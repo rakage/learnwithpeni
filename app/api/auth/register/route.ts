@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         data: {
           name: name,
         },
-        emailRedirectTo: `${window.location.origin}/auth/signin`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin`,
       },
     });
 
