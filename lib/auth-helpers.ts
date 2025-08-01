@@ -109,7 +109,6 @@ export async function checkAdminAuth() {
       };
     }
 
-    console.log("✅ Admin authentication successful");
     return {
       error: null,
       user: dbUser,
