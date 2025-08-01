@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
         data: {
           name: name,
         },
+        emailRedirectTo: `${window.location.origin}/auth/signin`,
       },
     });
 
