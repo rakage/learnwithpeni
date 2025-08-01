@@ -1,25 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   console.log("=== USER REGISTRATION ===");
 
   try {
-    const body = await request.json();
-    console.log("📝 Registration request received for:", body.email);
+    const { email, password, name } = await request.json();
+    console.log(`📧 Registration attempt for: ${email}`);
 
-    const { email, password, name } = body;
-
-    // Validate required fields
+    // Input validation
     if (!email || !password || !name) {
-      console.log("❌ Missing required fields:", {
-        email: !!email,
-        password: !!password,
-        name: !!name,
-      });
+      console.log("❌ Missing required fields");
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Email, password, and name are required" },
         { status: 400 }
       );
     }
@@ -27,7 +22,7 @@ export async function POST(request: NextRequest) {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      console.log("❌ Invalid email format:", email);
+      console.log("❌ Invalid email format");
       return NextResponse.json(
         { error: "Invalid email format" },
         { status: 400 }
@@ -36,148 +31,87 @@ export async function POST(request: NextRequest) {
 
     // Validate password strength
     if (password.length < 6) {
-      console.log("❌ Password too weak");
+      console.log("❌ Password too short");
       return NextResponse.json(
         { error: "Password must be at least 6 characters long" },
         { status: 400 }
       );
     }
 
-    console.log("🔐 Creating user in Supabase Auth...");
+    const supabase = createRouteHandlerClient({ cookies });
+
+    // Get the correct redirect URL based on environment
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const redirectUrl = `${baseUrl}/auth/callback`;
+
+    console.log(`🔗 Using redirect URL: ${redirectUrl}`);
 
     // Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    console.log("🔐 Creating user in Supabase Auth...");
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           name: name,
         },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin`,
+        emailRedirectTo: redirectUrl,
       },
     });
 
-    if (authError) {
-      console.log("❌ Supabase Auth error:", authError.message);
-      return NextResponse.json({ error: authError.message }, { status: 400 });
-    }
+    if (error) {
+      console.error("❌ Supabase signup error:", error);
 
-    if (!authData.user) {
-      console.log("❌ No user returned from Supabase");
-      return NextResponse.json(
-        { error: "Failed to create user account" },
-        { status: 500 }
-      );
-    }
-
-    console.log("✅ User created in Supabase Auth:", authData.user.id);
-
-    // Check if user already exists in database (in case of retry)
-    let dbUser;
-    try {
-      dbUser = await prisma.user.findUnique({
-        where: { id: authData.user.id },
-      });
-
-      if (dbUser) {
-        console.log("👤 User already exists in database");
-        return NextResponse.json({
-          success: true,
-          user: {
-            id: dbUser.id,
-            email: dbUser.email,
-            name: dbUser.name,
-            role: dbUser.role,
+      // Check for existing user
+      if (error.message?.includes("User already registered")) {
+        return NextResponse.json(
+          {
+            error:
+              "An account with this email already exists. Please sign in instead.",
           },
-          message: "User already registered",
+          { status: 409 }
+        );
+      }
+
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    console.log("✅ Supabase user created successfully");
+    console.log(`👤 User ID: ${data.user?.id}`);
+    console.log(`📧 Email: ${data.user?.email}`);
+    console.log(`✉️ Confirmation sent: ${!data.user?.email_confirmed_at}`);
+
+    // Check if user profile was created by trigger
+    if (data.user?.id) {
+      try {
+        console.log("🔍 Checking if user profile exists in database...");
+        const existingUser = await prisma.user.findUnique({
+          where: { id: data.user.id },
         });
-      }
-    } catch (findError) {
-      console.log("⚠️ Error checking existing user:", findError);
-      // Continue with creation
-    }
 
-    // Create user in our database
-    try {
-      console.log("💾 Creating user in database...");
-
-      dbUser = await prisma.user.create({
-        data: {
-          id: authData.user.id,
-          email: authData.user.email!,
-          name: name,
-          role: "STUDENT", // Default role
-        },
-      });
-
-      console.log("✅ User created in database:", dbUser.id);
-
-      return NextResponse.json({
-        success: true,
-        user: {
-          id: dbUser.id,
-          email: dbUser.email,
-          name: dbUser.name,
-          role: dbUser.role,
-        },
-        message: "Registration successful",
-      });
-    } catch (dbError: any) {
-      console.error("❌ Database error:", dbError);
-
-      // Check if it's a unique constraint violation
-      if (dbError.code === "P2002") {
-        console.log("⚠️ User already exists (unique constraint)");
-        // Try to find the existing user
-        try {
-          const existingUser = await prisma.user.findUnique({
-            where: { id: authData.user.id },
-          });
-
-          if (existingUser) {
-            return NextResponse.json({
-              success: true,
-              user: {
-                id: existingUser.id,
-                email: existingUser.email,
-                name: existingUser.name,
-                role: existingUser.role,
-              },
-              message: "User already registered",
-            });
-          }
-        } catch (findError) {
-          console.error("Error finding existing user:", findError);
+        if (existingUser) {
+          console.log("✅ User profile found in database");
+        } else {
+          console.log("⚠️ User profile not found, trigger may not have fired");
+          // The trigger should handle this, but we can log for debugging
         }
+      } catch (dbError) {
+        console.error("⚠️ Database check error:", dbError);
+        // Don't fail the registration, just log the issue
       }
-
-      // User was created in Supabase but failed in our DB
-      // This is okay - the user can still login and the trigger might handle it
-      console.log("⚠️ User created in Supabase but database sync failed");
-      return NextResponse.json({
-        success: true,
-        user: {
-          id: authData.user.id,
-          email: authData.user.email,
-          name: name,
-          role: "STUDENT",
-        },
-        warning:
-          "User created in auth but database sync pending. You can still sign in.",
-        message: "Registration completed with minor sync issue",
-      });
     }
-  } catch (error: any) {
+
+    return NextResponse.json({
+      message:
+        "User registered successfully. Please check your email to confirm your account.",
+      user: {
+        id: data.user?.id,
+        email: data.user?.email,
+        emailConfirmed: !!data.user?.email_confirmed_at,
+      },
+    });
+  } catch (error) {
     console.error("❌ Registration error:", error);
-
-    // Handle different types of errors
-    if (error.name === "SyntaxError") {
-      return NextResponse.json(
-        { error: "Invalid request format" },
-        { status: 400 }
-      );
-    }
-
     return NextResponse.json(
       { error: "Internal server error during registration" },
       { status: 500 }
