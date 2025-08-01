@@ -6,7 +6,9 @@ export const DUITKU_CONFIG = {
   API_KEY: process.env.DUITKU_API_KEY || "d2547323e018a40ddfd10d81923823ca",
   SANDBOX_URL: "https://sandbox.duitku.com/webapi/api/merchant",
   PRODUCTION_URL: "https://passport.duitku.com/webapi/api/merchant",
-  IS_PRODUCTION: process.env.NODE_ENV === "production",
+  // Use a specific environment variable for Duitku production mode
+  // This allows you to use sandbox even when deployed to production
+  IS_PRODUCTION: process.env.DUITKU_ENVIRONMENT === "production",
 };
 
 export const DUITKU_ENDPOINTS = {
@@ -200,22 +202,61 @@ export class DuitkuHelper {
       signature: signature,
     };
 
-    const response = await fetch(
-      `${this.getBaseUrl()}${DUITKU_ENDPOINTS.GET_PAYMENT_METHODS}`,
-      {
+    const apiUrl = `${this.getBaseUrl()}${
+      DUITKU_ENDPOINTS.GET_PAYMENT_METHODS
+    }`;
+
+    console.log("🔍 Duitku Payment Methods Request:");
+    console.log("- API URL:", apiUrl);
+    console.log(
+      "- Environment:",
+      DUITKU_CONFIG.IS_PRODUCTION ? "PRODUCTION" : "SANDBOX"
+    );
+    console.log("- Merchant Code:", DUITKU_CONFIG.MERCHANT_CODE);
+    console.log("- Amount:", amount);
+    console.log("- DateTime:", datetime);
+    console.log("- Signature:", signature);
+
+    try {
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestData),
+      });
+
+      console.log(
+        "🔍 Duitku Response Status:",
+        response.status,
+        response.statusText
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Duitku Error Response:", errorText);
+        throw new Error(
+          `Failed to get payment methods: ${response.statusText} - ${errorText}`
+        );
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`Failed to get payment methods: ${response.statusText}`);
+      const responseData = await response.json();
+      console.log(
+        "✅ Duitku Response Data:",
+        JSON.stringify(responseData, null, 2)
+      );
+
+      return responseData;
+    } catch (error) {
+      console.error("❌ Duitku API Error:", error);
+      console.error("Request details:", {
+        url: apiUrl,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData, null, 2),
+      });
+      throw error;
     }
-
-    return response.json();
   }
 
   // Create transaction

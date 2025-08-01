@@ -58,7 +58,7 @@ export default function SignUpPage() {
         toast.success(
           "Account created successfully! Redirecting to payment..."
         );
-        router.push("/payment");
+        router.push("/auth/signin");
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -73,7 +73,7 @@ export default function SignUpPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/payment`,
+          redirectTo: `${window.location.origin}/auth/signin`,
         },
       });
 
