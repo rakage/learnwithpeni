@@ -61,7 +61,39 @@ export class AuthClient {
     return token;
   }
 
-  // Authenticated fetch function
+  // Check if user is authenticated (similar to admin courses page pattern)
+  static async isAuthenticated(): Promise<boolean> {
+    try {
+      // First try to get token from localStorage
+      const token = this.getToken();
+      if (token) {
+        // Verify token is still valid by making a simple authenticated request
+        const response = await this.authenticatedFetch("/api/user/profile", {
+          method: "GET",
+        });
+        if (response.ok) {
+          return true;
+        }
+      }
+
+      // If token fails, try to refresh from session
+      const refreshedToken = await this.refreshToken();
+      if (refreshedToken) {
+        // Test the refreshed token
+        const response = await this.authenticatedFetch("/api/user/profile", {
+          method: "GET",
+        });
+        return response.ok;
+      }
+
+      return false;
+    } catch (error) {
+      console.error("Error checking authentication:", error);
+      return false;
+    }
+  }
+
+  // Authenticated fetch function with automatic retry
   static async authenticatedFetch(
     url: string,
     options: RequestInit = {}
@@ -97,6 +129,61 @@ export class AuthClient {
     return response;
   }
 
+  // Session-based fetch (uses cookies, similar to admin courses page pattern)
+  static async sessionFetch(
+    url: string,
+    options: RequestInit = {}
+  ): Promise<Response> {
+    // Add credentials to use session cookies
+    const fetchOptions: RequestInit = {
+      ...options,
+      credentials: "include", // This ensures cookies are sent
+    };
+
+    const response = await fetch(url, fetchOptions);
+
+    // If session-based auth fails, try Bearer token as fallback
+    if (response.status === 401) {
+      console.log("Session auth failed, trying Bearer token...");
+      return this.authenticatedFetch(url, options);
+    }
+
+    return response;
+  }
+
+  // Smart fetch that tries both Bearer token and session cookies
+  static async smartFetch(
+    url: string,
+    options: RequestInit = {}
+  ): Promise<Response> {
+    try {
+      // First, try Bearer token authentication (faster for API calls)
+      const token = this.getToken();
+      if (token) {
+        const headers = new Headers(options.headers);
+        headers.set("Authorization", `Bearer ${token}`);
+
+        const response = await fetch(url, {
+          ...options,
+          headers,
+          credentials: "include", // Also include cookies as backup
+        });
+
+        // If Bearer token works, return the response
+        if (response.ok || response.status !== 401) {
+          return response;
+        }
+      }
+
+      // If Bearer token fails or doesn't exist, try session-based
+      console.log("Bearer token failed/missing, trying session auth...");
+      return this.sessionFetch(url, options);
+    } catch (error) {
+      console.error("Smart fetch error:", error);
+      throw error;
+    }
+  }
+
   // Initialize token on app start
   static async initialize() {
     try {
@@ -125,17 +212,17 @@ export class AuthClient {
   }
 }
 
-// Convenience function for authenticated API calls
+// Convenience function for authenticated API calls (Bearer token)
 export async function apiCall(url: string, options: RequestInit = {}) {
   return AuthClient.authenticatedFetch(url, options);
 }
 
-// Convenience function for authenticated GET requests
+// Convenience function for authenticated GET requests (Bearer token)
 export async function apiGet(url: string) {
   return AuthClient.authenticatedFetch(url, { method: "GET" });
 }
 
-// Convenience function for authenticated POST requests
+// Convenience function for authenticated POST requests (Bearer token)
 export async function apiPost(url: string, data: any) {
   return AuthClient.authenticatedFetch(url, {
     method: "POST",
@@ -144,4 +231,38 @@ export async function apiPost(url: string, data: any) {
     },
     body: JSON.stringify(data),
   });
+}
+
+// Session-based convenience functions
+export async function sessionGet(url: string) {
+  return AuthClient.sessionFetch(url, { method: "GET" });
+}
+
+export async function sessionPost(url: string, data: any) {
+  return AuthClient.sessionFetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+}
+
+// Smart convenience functions (tries both methods)
+export async function smartGet(url: string) {
+  return AuthClient.smartFetch(url, { method: "GET" });
+}
+
+export async function smartPost(url: string, data: any) {
+  return AuthClient.smartFetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function smartCall(url: string, options: RequestInit = {}) {
+  return AuthClient.smartFetch(url, options);
 }

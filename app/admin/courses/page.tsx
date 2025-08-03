@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 import Navigation from "@/components/Navigation";
-import { apiGet, apiCall } from "@/lib/auth-client";
+import { smartGet, smartCall } from "@/lib/auth-client";
 
 interface Module {
   id: string;
@@ -55,7 +55,7 @@ export default function AdminCoursesPage() {
   const fetchCourses = async () => {
     try {
       console.log("📚 Fetching courses with Bearer token authentication...");
-      const response = await apiGet("/api/admin/courses");
+      const response = await smartGet("/api/admin/courses");
 
       if (!response.ok) {
         throw new Error("Failed to fetch courses");
@@ -88,7 +88,7 @@ export default function AdminCoursesPage() {
 
     try {
       console.log("🗑️ Deleting course:", courseId);
-      const response = await apiCall(`/api/admin/courses/${courseId}`, {
+      const response = await smartCall(`/api/admin/courses/${courseId}`, {
         method: "DELETE",
       });
 

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { apiGet, apiPost } from "@/lib/auth-client";
+import ProtectedVideoPlayer from "@/components/ProtectedVideoPlayer";
 import Link from "next/link";
-import ReactPlayer from "react-player";
 import toast from "react-hot-toast";
 import {
   BookOpen,
@@ -22,6 +22,55 @@ import {
   CreditCard,
 } from "lucide-react";
 import { calculateProgress } from "@/lib/utils";
+
+// Video protection styles
+const videoProtectionStyles = `
+  .video-container video {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  
+  .video-container video::-webkit-media-controls-download-button {
+    display: none !important;
+  }
+  
+  .video-container video::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+  }
+  
+  .protected-content {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+    pointer-events: none;
+  }
+  
+  .protected-content * {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+  }
+  
+  /* Disable print screen and screenshots */
+  @media print {
+    .video-container {
+      display: none !important;
+    }
+  }
+  
+  /* Hide dev tools hints */
+  .video-container {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+`;
 
 interface Module {
   id: string;
@@ -64,6 +113,46 @@ export default function CoursePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [accessDenied, setAccessDenied] = useState(false);
+
+  // Inject video protection styles
+  useEffect(() => {
+    const styleElement = document.createElement("style");
+    styleElement.innerHTML = videoProtectionStyles;
+    document.head.appendChild(styleElement);
+
+    // Anti-debugging measures
+    const protectContent = () => {
+      // Disable common shortcuts
+      const preventShortcuts = (e: KeyboardEvent) => {
+        // Disable F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S, Print Screen
+        if (
+          e.key === "F12" ||
+          (e.ctrlKey && e.shiftKey && e.key === "I") ||
+          (e.ctrlKey && e.key === "u") ||
+          (e.ctrlKey && e.key === "s") ||
+          e.key === "PrintScreen"
+        ) {
+          e.preventDefault();
+          toast.error("Content is protected from downloading");
+          return false;
+        }
+      };
+
+      document.addEventListener("keydown", preventShortcuts);
+
+      // Console warning for content protection
+      console.warn("🔒 Content protection active - Downloading is prohibited");
+
+      return () => {
+        document.removeEventListener("keydown", preventShortcuts);
+        document.head.removeChild(styleElement);
+      };
+    };
+
+    const cleanup = protectContent();
+
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     const initializeCourse = async () => {
@@ -497,19 +586,10 @@ export default function CoursePage() {
                 {/* Module Content */}
                 {currentModule.type === "VIDEO" && currentModule.videoUrl && (
                   <div className="mb-6">
-                    <div className="video-container rounded-lg overflow-hidden shadow-lg">
-                      <ReactPlayer
-                        url={currentModule.videoUrl}
-                        width="100%"
-                        height="100%"
-                        controls
-                        config={{
-                          youtube: {
-                            playerVars: { showinfo: 1 },
-                          },
-                        }}
-                      />
-                    </div>
+                    <ProtectedVideoPlayer
+                      videoUrl={currentModule.videoUrl}
+                      courseTitle={course.title}
+                    />
                   </div>
                 )}
 

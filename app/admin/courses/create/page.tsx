@@ -131,21 +131,36 @@ export default function CreateCoursePage() {
   const uploadCourseImage = async (file: File) => {
     setUploadingImage(true);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `course-${Date.now()}.${fileExt}`;
-      const filePath = `courses/images/${fileName}`;
+      console.log("📤 Uploading course image via API...");
 
-      const { error: uploadError } = await supabase.storage
-        .from("course-content")
-        .upload(filePath, file);
+      const formData = new FormData();
+      formData.append("file", file);
 
-      if (uploadError) throw uploadError;
+      const token = localStorage.getItem("supabase_access_token");
+      if (!token) {
+        throw new Error("Authentication required. Please log in again.");
+      }
 
-      const { data } = supabase.storage
-        .from("course-content")
-        .getPublicUrl(filePath);
+      const response = await fetch("/api/upload/s3", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-      setCourseData((prev) => ({ ...prev, imageUrl: data.publicUrl }));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to upload image");
+      }
+
+      setCourseData((prev) => ({ ...prev, imageUrl: result.url }));
       toast.success("Course image uploaded successfully!");
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -159,21 +174,36 @@ export default function CreateCoursePage() {
   const uploadVideo = async (file: File, moduleId: string) => {
     setUploadingVideo(moduleId);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `video-${moduleId}-${Date.now()}.${fileExt}`;
-      const filePath = `courses/videos/${fileName}`;
+      console.log("📤 Uploading video via API...");
 
-      const { error: uploadError } = await supabase.storage
-        .from("course-content")
-        .upload(filePath, file);
+      const formData = new FormData();
+      formData.append("file", file);
 
-      if (uploadError) throw uploadError;
+      const token = localStorage.getItem("supabase_access_token");
+      if (!token) {
+        throw new Error("Authentication required. Please log in again.");
+      }
 
-      const { data } = supabase.storage
-        .from("course-content")
-        .getPublicUrl(filePath);
+      const response = await fetch("/api/upload/s3", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-      updateModule(moduleId, { videoUrl: data.publicUrl });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to upload video");
+      }
+
+      updateModule(moduleId, { videoUrl: result.url });
       toast.success("Video uploaded successfully!");
     } catch (error) {
       console.error("Error uploading video:", error);
@@ -187,23 +217,38 @@ export default function CreateCoursePage() {
   const uploadFile = async (file: File, moduleId: string) => {
     setUploadingFile(moduleId);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `document-${moduleId}-${Date.now()}.${fileExt}`;
-      const filePath = `courses/documents/${fileName}`;
+      console.log("📤 Uploading document via API...");
 
-      const { error: uploadError } = await supabase.storage
-        .from("course-content")
-        .upload(filePath, file);
+      const formData = new FormData();
+      formData.append("file", file);
 
-      if (uploadError) throw uploadError;
+      const token = localStorage.getItem("supabase_access_token");
+      if (!token) {
+        throw new Error("Authentication required. Please log in again.");
+      }
 
-      const { data } = supabase.storage
-        .from("course-content")
-        .getPublicUrl(filePath);
+      const response = await fetch("/api/upload/s3", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to upload document");
+      }
 
       updateModule(moduleId, {
-        fileUrl: data.publicUrl,
-        fileName: file.name,
+        fileUrl: result.url,
+        fileName: result.fileName,
       });
       toast.success("Document uploaded successfully!");
     } catch (error) {

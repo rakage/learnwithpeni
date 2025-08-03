@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkUserAuth } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { checkUserAuth } from "@/lib/auth-helpers";
+import { getProxiedVideoUrl } from "@/lib/video-utils";
 
 // GET /api/courses/[id] - Get course with access control
 export async function GET(
@@ -113,7 +114,9 @@ export async function GET(
           description: module.description,
           type: module.type,
           content: module.content,
-          videoUrl: module.videoUrl,
+          videoUrl: module.videoUrl
+            ? getProxiedVideoUrl(module.videoUrl)
+            : module.videoUrl,
           fileUrl: module.fileUrl,
           duration: module.duration,
           order: module.order,
