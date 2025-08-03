@@ -28,8 +28,6 @@ export default function ProtectedVideoPlayer({
         setLoading(true);
         setError("");
 
-        console.log("🎥 Setting up video authentication...");
-
         // First check if user is authenticated (similar to admin courses page)
         const isAuth = await AuthClient.isAuthenticated();
         if (!isAuth) {
@@ -38,31 +36,16 @@ export default function ProtectedVideoPlayer({
 
         // Get the proxied URL without token (rely on smart authentication)
         const proxiedUrl = getProxiedVideoUrl(videoUrl);
-        console.log("🔗 Generated proxy URL:", proxiedUrl);
 
-        // Test if the proxy URL is accessible using smart fetch (tries both Bearer + session)
-        console.log(
-          "🧪 Testing video proxy access with smart authentication..."
-        );
         const testResponse = await AuthClient.smartFetch(proxiedUrl, {
           method: "HEAD", // Use HEAD to test accessibility without downloading
         });
 
         if (!testResponse.ok) {
-          console.error("❌ Video proxy test failed:", {
-            status: testResponse.status,
-            statusText: testResponse.statusText,
-          });
           throw new Error(
             `Video not accessible: ${testResponse.status} ${testResponse.statusText}`
           );
         }
-
-        console.log("✅ Video proxy accessible:", {
-          status: testResponse.status,
-          contentType: testResponse.headers.get("Content-Type"),
-          contentLength: testResponse.headers.get("Content-Length"),
-        });
 
         // Create an authenticated URL with session info
         // Add the access token as a URL parameter for ReactPlayer requests
@@ -73,10 +56,8 @@ export default function ProtectedVideoPlayer({
             )}&t=${Date.now()}`
           : `${proxiedUrl}?t=${Date.now()}`;
 
-        console.log("🎬 Using authenticated video URL with token parameter");
         setAuthenticatedUrl(authenticatedVideoUrl);
       } catch (err) {
-        console.error("❌ Video authentication error:", err);
         setError(err instanceof Error ? err.message : "Failed to load video");
       } finally {
         setLoading(false);

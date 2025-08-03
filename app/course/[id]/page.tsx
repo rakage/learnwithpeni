@@ -195,8 +195,6 @@ export default function CoursePage() {
 
   const fetchCourse = async (courseId: string, user: User) => {
     try {
-      console.log("📚 Fetching course:", courseId, "for user:", user.email);
-
       // Fetch course data with enrollment/access info
       const response = await apiGet(`/api/courses/${courseId}`);
 
@@ -213,7 +211,6 @@ export default function CoursePage() {
       }
 
       const data = await response.json();
-      console.log("✅ Course data received:", data);
 
       // Check access permissions
       const isAdmin = user.role === "ADMIN";
@@ -272,8 +269,6 @@ export default function CoursePage() {
     if (!course || !user) return;
 
     try {
-      console.log("✅ Marking module complete:", moduleId);
-
       const response = await apiPost("/api/progress/complete", {
         courseId: course.id,
         moduleId: moduleId,

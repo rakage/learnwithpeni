@@ -13,9 +13,6 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  console.log("Middleware - Session exists:", !!session);
-  console.log("Middleware - Path:", req.nextUrl.pathname);
-
   return res;
 }
 

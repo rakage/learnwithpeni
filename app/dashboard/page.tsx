@@ -121,7 +121,6 @@ export default function DashboardPage() {
 
   const fetchEnrolledCourses = async () => {
     try {
-      console.log("📚 Fetching enrolled courses for student");
       const response = await apiGet("/api/user/courses");
 
       if (!response.ok) {
@@ -129,7 +128,6 @@ export default function DashboardPage() {
       }
 
       const data = await response.json();
-      console.log("✅ Enrolled courses data:", data);
 
       // Process courses with progress calculation
       const coursesWithProgress = data.courses.map((course: any) => {
@@ -192,7 +190,6 @@ export default function DashboardPage() {
 
   const fetchAllCoursesForAdmin = async () => {
     try {
-      console.log("👑 Fetching all courses for admin");
       const response = await apiGet("/api/admin/courses");
 
       if (!response.ok) {
@@ -200,7 +197,6 @@ export default function DashboardPage() {
       }
 
       const data = await response.json();
-      console.log("✅ Admin courses data:", data);
 
       // Process courses for admin view
       const processedCourses = data.courses.map((course: any) => ({

@@ -273,7 +273,6 @@ export default function PaymentPage() {
 
       const result = await response.json();
 
-      console.log("Payment created:", result);
       toast.success("Payment created successfully!");
 
       // Redirect to payment URL or show payment details

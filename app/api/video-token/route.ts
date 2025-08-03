@@ -26,15 +26,6 @@ export async function POST(request: NextRequest) {
     // Generate a secure token for this user and video
     const token = generateVideoToken(videoPath, authResult.user.id);
 
-    console.log(
-      `🎥 Generated video token for user ${authResult.user.email}: ${videoPath}`
-    );
-    console.log("🔍 Token details:", {
-      videoPath,
-      userId: authResult.user.id,
-      tokenPreview: token.substring(0, 20) + "...",
-    });
-
     return NextResponse.json({
       success: true,
       token,

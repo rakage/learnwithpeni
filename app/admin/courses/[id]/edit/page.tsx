@@ -69,7 +69,6 @@ export default function EditCoursePage() {
   // Load course data
   const loadCourseData = async () => {
     try {
-      console.log("📚 Loading course data for editing:", courseId);
       const response = await apiGet(`/api/admin/courses/${courseId}`);
 
       if (!response.ok) {
@@ -77,7 +76,6 @@ export default function EditCoursePage() {
       }
 
       const data = await response.json();
-      console.log("✅ Course data loaded:", data.course);
 
       setCourseData({
         ...data.course,
@@ -322,8 +320,6 @@ export default function EditCoursePage() {
 
     setSaving(true);
     try {
-      console.log("💾 Updating course with Bearer token authentication...");
-
       const response = await apiCall(`/api/admin/courses/${courseId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -343,7 +339,6 @@ export default function EditCoursePage() {
       }
 
       const result = await response.json();
-      console.log("✅ Course updated successfully:", result);
 
       toast.success("Course updated successfully!");
       router.push("/admin/courses");

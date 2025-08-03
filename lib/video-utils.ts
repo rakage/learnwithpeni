@@ -95,35 +95,20 @@ export function validateVideoToken(
   maxAge: number = 60 * 60 * 1000
 ): { valid: boolean; videoPath?: string; userId?: string } {
   try {
-    console.log("🔍 Validating token:", token.substring(0, 20) + "...");
-
     const tokenData = Buffer.from(token, "base64").toString("utf-8");
-    console.log("🔍 Decoded token data:", tokenData);
 
     const [videoPath, userId, timestampStr] = tokenData.split(":");
-    console.log("🔍 Token parts:", { videoPath, userId, timestampStr });
 
     const timestamp = parseInt(timestampStr);
     const now = Date.now();
     const age = now - timestamp;
 
-    console.log("🔍 Token age check:", {
-      timestamp,
-      now,
-      age,
-      maxAge,
-      expired: age > maxAge,
-    });
-
     if (now - timestamp > maxAge) {
-      console.log("❌ Token expired");
       return { valid: false }; // Token expired
     }
 
-    console.log("✅ Token validation successful");
     return { valid: true, videoPath, userId };
   } catch (error) {
-    console.log("❌ Token validation error:", error);
     return { valid: false };
   }
 }

@@ -131,8 +131,6 @@ export default function CreateCoursePage() {
   const uploadCourseImage = async (file: File) => {
     setUploadingImage(true);
     try {
-      console.log("📤 Uploading course image via API...");
-
       const formData = new FormData();
       formData.append("file", file);
 
@@ -174,8 +172,6 @@ export default function CreateCoursePage() {
   const uploadVideo = async (file: File, moduleId: string) => {
     setUploadingVideo(moduleId);
     try {
-      console.log("📤 Uploading video via API...");
-
       const formData = new FormData();
       formData.append("file", file);
 
@@ -217,8 +213,6 @@ export default function CreateCoursePage() {
   const uploadFile = async (file: File, moduleId: string) => {
     setUploadingFile(moduleId);
     try {
-      console.log("📤 Uploading document via API...");
-
       const formData = new FormData();
       formData.append("file", file);
 
@@ -294,8 +288,6 @@ export default function CreateCoursePage() {
 
     setLoading(true);
     try {
-      console.log("🚀 Creating course with Bearer token authentication...");
-
       // Use authenticated API call with Bearer token
       const response = await apiPost("/api/admin/courses", {
         title: courseData.title,
@@ -311,7 +303,6 @@ export default function CreateCoursePage() {
       }
 
       const result = await response.json();
-      console.log("✅ Course created successfully:", result);
 
       toast.success("Course created successfully!");
       router.push("/admin/courses");

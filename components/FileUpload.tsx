@@ -66,8 +66,6 @@ export default function FileUpload({
         });
       }, 200);
 
-      console.log(`📤 Uploading ${file.name} to AWS S3 via API...`);
-
       // Create form data
       const formData = new FormData();
       formData.append("file", file);
@@ -108,8 +106,6 @@ export default function FileUpload({
 
       setUploadProgress(100);
       onUploadComplete(result.url, result.fileName);
-
-      console.log(`✅ File uploaded successfully: ${result.url}`);
     } catch (error) {
       console.error("Upload error:", error);
       onUploadError(

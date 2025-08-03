@@ -54,7 +54,6 @@ export default function AdminCoursesPage() {
 
   const fetchCourses = async () => {
     try {
-      console.log("📚 Fetching courses with Bearer token authentication...");
       const response = await smartGet("/api/admin/courses");
 
       if (!response.ok) {
@@ -62,11 +61,7 @@ export default function AdminCoursesPage() {
       }
 
       const data = await response.json();
-      console.log(
-        "✅ Courses fetched successfully:",
-        data.courses?.length || 0,
-        "courses"
-      );
+
       setCourses(data.courses);
     } catch (error) {
       console.error("❌ Error fetching courses:", error);
@@ -87,7 +82,6 @@ export default function AdminCoursesPage() {
     }
 
     try {
-      console.log("🗑️ Deleting course:", courseId);
       const response = await smartCall(`/api/admin/courses/${courseId}`, {
         method: "DELETE",
       });
