@@ -2,8 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import { apiGet, apiPost, apiCall } from "@/lib/auth-client";
+import {
+  validateFile,
+  formatFileSize,
+  MAX_VIDEO_SIZE,
+  MAX_FILE_SIZE,
+} from "@/lib/upload-config";
 import toast from "react-hot-toast";
 import {
   BookOpen,
@@ -170,88 +175,181 @@ export default function EditCoursePage() {
     });
   };
 
-  // Upload course image
+  // Upload course image using S3
   const uploadCourseImage = async (file: File) => {
     setUploadingImage(true);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `course-${courseId}-${Date.now()}.${fileExt}`;
-      const filePath = `courses/images/${fileName}`;
+      // Validate file type and size for images
+      const imageTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      const maxImageSize = 10 * 1024 * 1024; // 10MB for images
 
-      const { error: uploadError } = await supabase.storage
-        .from("course-content")
-        .upload(filePath, file);
+      if (!imageTypes.includes(file.type)) {
+        throw new Error(
+          "Please select a valid image file (JPEG, PNG, or WebP)"
+        );
+      }
 
-      if (uploadError) throw uploadError;
+      if (file.size > maxImageSize) {
+        throw new Error(
+          `Image size (${formatFileSize(
+            file.size
+          )}) exceeds the maximum limit of ${formatFileSize(maxImageSize)}`
+        );
+      }
 
-      const { data } = supabase.storage
-        .from("course-content")
-        .getPublicUrl(filePath);
+      // Create form data
+      const formData = new FormData();
+      formData.append("file", file);
+      if (courseId) {
+        formData.append("courseId", courseId);
+      }
 
-      setCourseData((prev) => ({ ...prev!, imageUrl: data.publicUrl }));
+      // Get authentication token
+      const token = localStorage.getItem("supabase_access_token");
+      if (!token) {
+        throw new Error("Authentication required. Please log in again.");
+      }
+
+      // Upload via S3 API endpoint
+      const response = await fetch("/api/upload/s3", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Upload failed");
+      }
+
+      setCourseData((prev) => ({ ...prev!, imageUrl: result.url }));
       toast.success("Course image updated successfully!");
     } catch (error) {
       console.error("Error uploading image:", error);
-      toast.error("Failed to upload course image");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to upload course image"
+      );
     } finally {
       setUploadingImage(false);
     }
   };
 
-  // Upload video
+  // Upload video using S3
   const uploadVideo = async (file: File, moduleId: string) => {
     setUploadingVideo(moduleId);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `video-${moduleId}-${Date.now()}.${fileExt}`;
-      const filePath = `courses/videos/${fileName}`;
+      // Validate video file
+      const validation = validateFile(file, true);
+      if (!validation.valid) {
+        throw new Error(validation.error);
+      }
 
-      const { error: uploadError } = await supabase.storage
-        .from("course-content")
-        .upload(filePath, file);
+      // Create form data
+      const formData = new FormData();
+      formData.append("file", file);
+      if (courseId) {
+        formData.append("courseId", courseId);
+      }
 
-      if (uploadError) throw uploadError;
+      // Get authentication token
+      const token = localStorage.getItem("supabase_access_token");
+      if (!token) {
+        throw new Error("Authentication required. Please log in again.");
+      }
 
-      const { data } = supabase.storage
-        .from("course-content")
-        .getPublicUrl(filePath);
+      // Upload via S3 API endpoint
+      const response = await fetch("/api/upload/s3", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-      updateModule(moduleId, { videoUrl: data.publicUrl });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Upload failed");
+      }
+
+      updateModule(moduleId, { videoUrl: result.url });
       toast.success("Video uploaded successfully!");
     } catch (error) {
       console.error("Error uploading video:", error);
-      toast.error("Failed to upload video");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to upload video"
+      );
     } finally {
       setUploadingVideo(null);
     }
   };
 
-  // Upload file/document
+  // Upload file/document using S3
   const uploadFile = async (file: File, moduleId: string) => {
     setUploadingFile(moduleId);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `document-${moduleId}-${Date.now()}.${fileExt}`;
-      const filePath = `courses/documents/${fileName}`;
+      // Validate document file
+      const validation = validateFile(file, false);
+      if (!validation.valid) {
+        throw new Error(validation.error);
+      }
 
-      const { error: uploadError } = await supabase.storage
-        .from("course-content")
-        .upload(filePath, file);
+      // Create form data
+      const formData = new FormData();
+      formData.append("file", file);
+      if (courseId) {
+        formData.append("courseId", courseId);
+      }
 
-      if (uploadError) throw uploadError;
+      // Get authentication token
+      const token = localStorage.getItem("supabase_access_token");
+      if (!token) {
+        throw new Error("Authentication required. Please log in again.");
+      }
 
-      const { data } = supabase.storage
-        .from("course-content")
-        .getPublicUrl(filePath);
+      // Upload via S3 API endpoint
+      const response = await fetch("/api/upload/s3", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Upload failed");
+      }
 
       updateModule(moduleId, {
-        fileUrl: data.publicUrl,
-        fileName: file.name,
+        fileUrl: result.url,
+        fileName: result.fileName,
       });
       toast.success("Document uploaded successfully!");
     } catch (error) {
       console.error("Error uploading file:", error);
-      toast.error("Failed to upload document");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to upload document"
+      );
     } finally {
       setUploadingFile(null);
     }
@@ -501,6 +599,17 @@ export default function EditCoursePage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Course Image
                     </label>
+                    <div className="mb-2 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                      <p>
+                        <strong>Upload Requirements:</strong>
+                      </p>
+                      <ul className="mt-1 space-y-1 text-xs">
+                        <li>• Maximum size: 10MB</li>
+                        <li>• Allowed formats: JPEG, PNG, WebP</li>
+                        <li>• Recommended size: 1200x630px for best display</li>
+                        <li>• Files are stored securely on AWS S3</li>
+                      </ul>
+                    </div>
                     <div className="flex items-center space-x-4">
                       {courseData.imageUrl ? (
                         <div className="relative">
@@ -536,7 +645,7 @@ export default function EditCoursePage() {
                       <input
                         ref={imageInputRef}
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) uploadCourseImage(file);
@@ -852,6 +961,17 @@ function ModuleEditor({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Video File
             </label>
+            <div className="mb-2 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+              <p>
+                <strong>Video Requirements:</strong>
+              </p>
+              <ul className="mt-1 space-y-1 text-xs">
+                <li>• Maximum size: {formatFileSize(MAX_VIDEO_SIZE)}</li>
+                <li>• Allowed formats: MP4, WebM, OGG</li>
+                <li>• Recommended: MP4 format for best compatibility</li>
+                <li>• Files are stored securely on AWS S3</li>
+              </ul>
+            </div>
             {module.videoUrl ? (
               <div className="space-y-2">
                 <video
@@ -878,7 +998,7 @@ function ModuleEditor({
                     {uploadingVideo ? "Uploading..." : "Click to upload video"}
                   </button>
                   <p className="text-xs text-gray-500 mt-1">
-                    MP4, WebM, or OGV
+                    MP4, WebM, or OGG (max {formatFileSize(MAX_VIDEO_SIZE)})
                   </p>
                 </div>
               </div>
@@ -886,7 +1006,7 @@ function ModuleEditor({
             <input
               ref={videoInputRef}
               type="file"
-              accept="video/*"
+              accept="video/mp4,video/webm,video/ogg"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) onUploadVideo(file);
@@ -916,6 +1036,19 @@ function ModuleEditor({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Document File
             </label>
+            <div className="mb-2 text-sm text-gray-600 bg-purple-50 p-3 rounded-lg">
+              <p>
+                <strong>Document Requirements:</strong>
+              </p>
+              <ul className="mt-1 space-y-1 text-xs">
+                <li>• Maximum size: {formatFileSize(MAX_FILE_SIZE)}</li>
+                <li>
+                  • Allowed formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT
+                </li>
+                <li>• Archive formats: ZIP, RAR, 7Z</li>
+                <li>• Files are stored securely on AWS S3</li>
+              </ul>
+            </div>
             {module.fileUrl ? (
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center space-x-2">
@@ -947,7 +1080,8 @@ function ModuleEditor({
                       : "Click to upload document"}
                   </button>
                   <p className="text-xs text-gray-500 mt-1">
-                    PDF, DOC, DOCX, TXT, ZIP
+                    PDF, DOC, DOCX, TXT, ZIP (max{" "}
+                    {formatFileSize(MAX_FILE_SIZE)})
                   </p>
                 </div>
               </div>
@@ -955,7 +1089,7 @@ function ModuleEditor({
             <input
               ref={fileInputRef}
               type="file"
-              accept=".pdf,.doc,.docx,.txt,.zip"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.7z"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) onUploadFile(file);

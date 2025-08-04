@@ -1,6 +1,6 @@
 // File size limits
-export const MAX_VIDEO_SIZE = 1000 * 1024 * 1024; // 1000MB in bytes
-export const MAX_FILE_SIZE = 1000 * 1024 * 1024; // 1000MB for other files
+export const MAX_VIDEO_SIZE = 2000 * 1024 * 1024; // 2GB in bytes
+export const MAX_FILE_SIZE = 2000 * 1024 * 1024; // 2GB for other files
 
 // Allowed file types
 export const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg"];
