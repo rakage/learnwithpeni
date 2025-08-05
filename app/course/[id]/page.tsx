@@ -110,7 +110,7 @@ export default function CoursePage() {
   const [course, setCourse] = useState<Course | null>(null);
   const [currentModule, setCurrentModule] = useState<Module | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [accessDenied, setAccessDenied] = useState(false);
 
@@ -139,9 +139,6 @@ export default function CoursePage() {
       };
 
       document.addEventListener("keydown", preventShortcuts);
-
-      // Console warning for content protection
-      console.warn("🔒 Content protection active - Downloading is prohibited");
 
       return () => {
         document.removeEventListener("keydown", preventShortcuts);
@@ -435,7 +432,7 @@ export default function CoursePage() {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 lg:static absolute inset-y-0 left-0 z-40 w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out`}
+        } fixed inset-y-0 left-0 z-40 w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out`}
       >
         <div className="flex items-center justify-between p-4 border-b">
           <Link href="/dashboard" className="flex items-center space-x-2">
@@ -444,10 +441,7 @@ export default function CoursePage() {
               Back to Dashboard
             </span>
           </Link>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1"
-          >
+          <button onClick={() => setSidebarOpen(false)} className="p-1">
             <X className="h-6 w-6 text-gray-400" />
           </button>
         </div>
@@ -538,13 +532,21 @@ export default function CoursePage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
+          sidebarOpen ? "lg:ml-80" : "ml-0"
+        }`}
+      >
         {/* Header */}
         <header className="bg-white shadow-sm border-b px-4 py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2"
+              className={`p-2 -ml-2 transition-opacity duration-300 ${
+                sidebarOpen
+                  ? "lg:opacity-0 lg:pointer-events-none"
+                  : "opacity-100"
+              }`}
             >
               <Menu className="h-6 w-6 text-gray-600" />
             </button>
@@ -585,6 +587,44 @@ export default function CoursePage() {
                       videoUrl={currentModule.videoUrl}
                       courseTitle={course.title}
                     />
+
+                    {/* Navigation Controls positioned below video player */}
+                    <div className="flex items-center justify-center mt-4 space-x-6">
+                      <button
+                        onClick={goToPreviousModule}
+                        disabled={
+                          course.modules.findIndex(
+                            (m) => m.id === currentModule.id
+                          ) === 0
+                        }
+                        className="flex items-center space-x-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                        <span>Previous</span>
+                      </button>
+
+                      <span className="text-sm text-gray-500 font-medium">
+                        Module{" "}
+                        {course.modules.findIndex(
+                          (m) => m.id === currentModule.id
+                        ) + 1}{" "}
+                        of {course.modules.length}
+                      </span>
+
+                      <button
+                        onClick={goToNextModule}
+                        disabled={
+                          course.modules.findIndex(
+                            (m) => m.id === currentModule.id
+                          ) ===
+                          course.modules.length - 1
+                        }
+                        className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span>Next</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -631,56 +671,50 @@ export default function CoursePage() {
                   </div>
                 )}
 
-                {/* Navigation */}
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={goToPreviousModule}
-                    disabled={
-                      course.modules.findIndex(
-                        (m) => m.id === currentModule.id
-                      ) === 0
-                    }
-                    className="flex items-center space-x-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    <span>Previous</span>
-                  </button>
+                {/* Navigation - only show for non-video modules */}
+                {currentModule.type !== "VIDEO" && (
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={goToPreviousModule}
+                      disabled={
+                        course.modules.findIndex(
+                          (m) => m.id === currentModule.id
+                        ) === 0
+                      }
+                      className="flex items-center space-x-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      <span>Previous</span>
+                    </button>
 
-                  <span className="text-sm text-gray-500">
-                    Module{" "}
-                    {course.modules.findIndex(
-                      (m) => m.id === currentModule.id
-                    ) + 1}{" "}
-                    of {course.modules.length}
-                  </span>
-
-                  <button
-                    onClick={goToNextModule}
-                    disabled={
-                      course.modules.findIndex(
+                    <span className="text-sm text-gray-500">
+                      Module{" "}
+                      {course.modules.findIndex(
                         (m) => m.id === currentModule.id
-                      ) ===
-                      course.modules.length - 1
-                    }
-                    className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span>Next</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
+                      ) + 1}{" "}
+                      of {course.modules.length}
+                    </span>
+
+                    <button
+                      onClick={goToNextModule}
+                      disabled={
+                        course.modules.findIndex(
+                          (m) => m.id === currentModule.id
+                        ) ===
+                        course.modules.length - 1
+                      }
+                      className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span>Next</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </div>
         </main>
       </div>
-
-      {/* Overlay for mobile sidebar */}
-      {sidebarOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   );
 }

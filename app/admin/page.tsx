@@ -198,9 +198,6 @@ export default function AdminPage() {
               Admin Dashboard
             </h1>
             <p className="text-gray-600">Manage your LMS platform</p>
-            <div className="mt-2 text-sm text-green-600">
-              ✅ Authenticated with Bearer token system
-            </div>
           </div>
 
           {/* Quick Actions */}
