@@ -16,6 +16,13 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
+  api: {
+    // Increase the body parser size limit for API routes
+    // This is only for the initial request to get the presigned URL, not for the actual file upload
+    bodyParser: {
+      sizeLimit: '4mb',
+    },
+  },
 };
 
 module.exports = nextConfig;

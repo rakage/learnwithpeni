@@ -55,24 +55,6 @@ export default function FileUpload({
       setUploading(true);
       setUploadProgress(0);
 
-      // Simulate progress for better UX
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
-
-      // Create form data
-      const formData = new FormData();
-      formData.append("file", file);
-      if (courseId) {
-        formData.append("courseId", courseId);
-      }
-
       // Get authentication token
       const token = localStorage.getItem("supabase_access_token");
       if (!token) {
@@ -81,27 +63,94 @@ export default function FileUpload({
         );
       }
 
-      // Upload via API endpoint
-      const response = await fetch("/api/upload/s3", {
+      // Step 1: Request a presigned URL from our API
+      setUploadProgress(10);
+      const presignedUrlResponse = await fetch("/api/upload/s3", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+          courseId: courseId,
+        }),
       });
 
-      // Clear progress interval
-      clearInterval(progressInterval);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Upload failed");
+      if (!presignedUrlResponse.ok) {
+        const errorData = await presignedUrlResponse.json();
+        throw new Error(errorData.error || "Failed to get upload URL");
       }
 
-      const result = await response.json();
+      const presignedData = await presignedUrlResponse.json();
+      
+      if (!presignedData.success || !presignedData.presignedUrl) {
+        throw new Error(presignedData.error || "Failed to get upload URL");
+      }
 
+      // Step 2: Upload the file directly to S3 using the presigned URL
+      setUploadProgress(20);
+      
+      // Set up progress monitoring
+      const xhr = new XMLHttpRequest();
+      
+      xhr.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          // Calculate progress percentage (20-90% range)
+          const percentComplete = 20 + Math.round((event.loaded / event.total) * 70);
+          setUploadProgress(percentComplete);
+        }
+      });
+
+      // Create a promise to handle the XHR request
+      const uploadPromise = new Promise((resolve, reject) => {
+        xhr.open("PUT", presignedData.presignedUrl);
+        xhr.setRequestHeader("Content-Type", file.type);
+        
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            resolve(xhr.response);
+          } else {
+            reject(new Error(`Upload failed with status: ${xhr.status}`));
+          }
+        };
+        
+        xhr.onerror = () => {
+          reject(new Error("Network error during upload"));
+        };
+        
+        xhr.send(file);
+      });
+      
+      // Wait for the upload to complete
+      await uploadPromise;
+      
+      // Step 3: Confirm the upload with our API
+      setUploadProgress(95);
+      const confirmResponse = await fetch("/api/upload/s3", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          key: presignedData.key,
+          fileName: file.name,
+          size: file.size,
+        }),
+      });
+      
+      if (!confirmResponse.ok) {
+        const errorData = await confirmResponse.json();
+        throw new Error(errorData.error || "Failed to confirm upload");
+      }
+      
+      const result = await confirmResponse.json();
+      
       if (!result.success) {
-        throw new Error(result.error || "Upload failed");
+        throw new Error(result.error || "Upload confirmation failed");
       }
 
       setUploadProgress(100);
