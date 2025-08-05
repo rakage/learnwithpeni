@@ -4,6 +4,7 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   ServerSideEncryption,
+  createPresignedPost,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -127,6 +128,38 @@ export class S3Helper {
     });
 
     return await getSignedUrl(s3Client, command, { expiresIn });
+  }
+  
+  // Generate pre-signed POST for direct browser uploads
+  static async createPresignedPost(
+    key: string,
+    contentType: string,
+    maxFileSize: number = 8000000, // 8MB default
+    expiresIn: number = 600 // 10 minutes
+  ): Promise<{
+    url: string;
+    fields: Record<string, string>;
+  }> {
+    if (!AWS_CONFIG.bucketName) {
+      throw new Error("AWS S3 bucket name is not configured");
+    }
+
+    // Create the presigned POST request
+    const presignedPost = await createPresignedPost(s3Client, {
+      Bucket: AWS_CONFIG.bucketName,
+      Key: key,
+      Conditions: [
+        ["content-length-range", 1024, maxFileSize], // Min 1KB, Max from parameter
+        ["eq", "$Content-Type", contentType],
+      ],
+      Fields: {
+        "Content-Type": contentType,
+        "x-amz-server-side-encryption": "AES256",
+      },
+      Expires: expiresIn,
+    });
+
+    return presignedPost;
   }
 
   // Delete file from S3

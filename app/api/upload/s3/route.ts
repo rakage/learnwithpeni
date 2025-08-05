@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Process JSON request for presigned URL
+    // Process JSON request for presigned POST
     const { fileName, fileType, fileSize, courseId } = body;
 
     if (!fileName || !fileType) {
@@ -163,21 +163,45 @@ export async function POST(request: NextRequest) {
     // Generate a unique file path for S3
     const category = S3Helper.getFileCategory(fileType);
     const filePath = S3Helper.generateFilePath(category, fileName, courseId);
+    
+    // Calculate max file size based on file type
+    const isVideo = fileType.startsWith("video/");
+    const maxFileSize = isVideo ? 1024 * 1024 * 1024 : 100 * 1024 * 1024; // 1GB for videos, 100MB for other files
 
-    // Generate a pre-signed URL for direct upload
-    const presignedUrl = await S3Helper.generatePresignedUploadUrl(filePath, fileType);
+    try {
+      // Generate a pre-signed POST for direct upload
+      const presignedPost = await S3Helper.createPresignedPost(
+        filePath, 
+        fileType,
+        maxFileSize,
+        600 // 10 minutes expiration
+      );
 
-    console.log("✅ Presigned URL generated successfully");
+      console.log("✅ Presigned POST generated successfully");
 
-    return NextResponse.json({
-      success: true,
-      presignedUrl,
-      url: S3Helper.getPublicUrl(filePath),
-      key: filePath,
-      fileName,
-      size: fileSize,
-      message: "Presigned URL generated successfully",
-    });
+      return NextResponse.json({
+        success: true,
+        presignedPost: {
+          url: presignedPost.url,
+          fields: presignedPost.fields
+        },
+        publicUrl: S3Helper.getPublicUrl(filePath),
+        key: filePath,
+        fileName,
+        size: fileSize,
+        message: "Presigned POST generated successfully",
+      });
+    } catch (error) {
+      console.error("❌ Failed to generate presigned POST:", error);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to generate upload credentials",
+          details: error instanceof Error ? error.message : "Unknown error",
+        },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("❌ Upload API error:", error);
     return NextResponse.json(

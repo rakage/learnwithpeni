@@ -63,9 +63,9 @@ export default function FileUpload({
         );
       }
 
-      // Step 1: Request a presigned URL from our API
+      // Step 1: Request a presigned POST from our API
       setUploadProgress(10);
-      const presignedUrlResponse = await fetch("/api/upload/s3", {
+      const presignedPostResponse = await fetch("/api/upload/s3", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -79,19 +79,30 @@ export default function FileUpload({
         }),
       });
 
-      if (!presignedUrlResponse.ok) {
-        const errorData = await presignedUrlResponse.json();
-        throw new Error(errorData.error || "Failed to get upload URL");
+      if (!presignedPostResponse.ok) {
+        const errorData = await presignedPostResponse.json();
+        throw new Error(errorData.error || "Failed to get upload credentials");
       }
 
-      const presignedData = await presignedUrlResponse.json();
+      const presignedData = await presignedPostResponse.json();
       
-      if (!presignedData.success || !presignedData.presignedUrl) {
-        throw new Error(presignedData.error || "Failed to get upload URL");
+      if (!presignedData.success || !presignedData.presignedPost) {
+        throw new Error(presignedData.error || "Failed to get upload credentials");
       }
 
-      // Step 2: Upload the file directly to S3 using the presigned URL
+      // Step 2: Upload the file directly to S3 using the presigned POST
       setUploadProgress(20);
+      
+      // Create a FormData object and append all the required fields
+      const formData = new FormData();
+      
+      // Add all the fields from the presigned post
+      Object.entries(presignedData.presignedPost.fields).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+      
+      // Append the actual file as the last field
+      formData.append('file', file);
       
       // Set up progress monitoring
       const xhr = new XMLHttpRequest();
@@ -106,11 +117,11 @@ export default function FileUpload({
 
       // Create a promise to handle the XHR request
       const uploadPromise = new Promise((resolve, reject) => {
-        xhr.open("PUT", presignedData.presignedUrl);
-        xhr.setRequestHeader("Content-Type", file.type);
+        xhr.open("POST", presignedData.presignedPost.url);
         
         xhr.onload = () => {
-          if (xhr.status === 200) {
+          // S3 returns 204 No Content on successful upload with POST
+          if (xhr.status === 204 || xhr.status === 200) {
             resolve(xhr.response);
           } else {
             reject(new Error(`Upload failed with status: ${xhr.status}`));
@@ -121,7 +132,7 @@ export default function FileUpload({
           reject(new Error("Network error during upload"));
         };
         
-        xhr.send(file);
+        xhr.send(formData);
       });
       
       // Wait for the upload to complete
@@ -154,7 +165,7 @@ export default function FileUpload({
       }
 
       setUploadProgress(100);
-      onUploadComplete(result.url, result.fileName);
+      onUploadComplete(result.url || presignedData.publicUrl, result.fileName);
     } catch (error) {
       console.error("Upload error:", error);
       onUploadError(
