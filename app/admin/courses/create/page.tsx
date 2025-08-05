@@ -18,6 +18,12 @@ import {
 import AuthGuard from "@/components/AuthGuard";
 import Navigation from "@/components/Navigation";
 import { apiPost } from "@/lib/auth-client";
+import {
+  validateFile,
+  formatFileSize,
+  MAX_VIDEO_SIZE,
+  MAX_FILE_SIZE,
+} from "@/lib/upload-config";
 
 interface Module {
   id: string;
@@ -127,127 +133,312 @@ export default function CreateCoursePage() {
     });
   };
 
-  // Upload course image
+  // Upload course image using S3 with signed POST request
   const uploadCourseImage = async (file: File) => {
     setUploadingImage(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      // Validate image file (max 10MB, only image formats)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error("Image size must be less than 10MB");
+      }
 
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error("Only JPEG, PNG, and WebP images are allowed");
+      }
+
+      // Get authentication token
       const token = localStorage.getItem("supabase_access_token");
       if (!token) {
         throw new Error("Authentication required. Please log in again.");
       }
 
-      const response = await fetch("/api/upload/s3", {
+      // Step 1: Request a presigned POST from our API
+      const presignedPostResponse = await fetch("/api/upload/s3", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+        }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Upload failed");
+      if (!presignedPostResponse.ok) {
+        const errorData = await presignedPostResponse.json();
+        throw new Error(errorData.error || "Failed to get upload credentials");
       }
 
-      const result = await response.json();
+      const presignedData = await presignedPostResponse.json();
+      
+      if (!presignedData.success || !presignedData.presignedPost) {
+        throw new Error(presignedData.error || "Failed to get upload credentials");
+      }
 
+      // Step 2: Upload the file directly to S3 using the presigned POST
+      // Create a FormData object and append all the required fields
+      const formData = new FormData();
+      
+      // Add all the fields from the presigned post
+      Object.entries(presignedData.presignedPost.fields).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+      
+      // Append the actual file as the last field
+      formData.append('file', file);
+      
+      // Upload directly to S3
+      const uploadResponse = await fetch(presignedData.presignedPost.url, {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (uploadResponse.status !== 204 && uploadResponse.status !== 200) {
+        throw new Error(`Upload failed with status: ${uploadResponse.status}`);
+      }
+      
+      // Step 3: Confirm the upload with our API
+      const confirmResponse = await fetch("/api/upload/s3", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          key: presignedData.key,
+          fileName: file.name,
+          size: file.size,
+        }),
+      });
+      
+      if (!confirmResponse.ok) {
+        const errorData = await confirmResponse.json();
+        throw new Error(errorData.error || "Failed to confirm upload");
+      }
+      
+      const result = await confirmResponse.json();
+      
       if (!result.success) {
-        throw new Error(result.error || "Failed to upload image");
+        throw new Error(result.error || "Upload confirmation failed");
       }
 
-      setCourseData((prev) => ({ ...prev, imageUrl: result.url }));
+      // Update course data with new image URL
+      setCourseData((prev) => ({
+        ...prev,
+        imageUrl: result.url || presignedData.publicUrl,
+      }));
       toast.success("Course image uploaded successfully!");
     } catch (error) {
       console.error("Error uploading image:", error);
-      toast.error("Failed to upload course image");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to upload course image"
+      );
     } finally {
       setUploadingImage(false);
     }
   };
 
-  // Upload video
+  // Upload video using S3 with signed POST request
   const uploadVideo = async (file: File, moduleId: string) => {
     setUploadingVideo(moduleId);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      // Validate video file
+      const validation = validateFile(file, true);
+      if (!validation.valid) {
+        throw new Error(validation.error);
+      }
 
+      // Get authentication token
       const token = localStorage.getItem("supabase_access_token");
       if (!token) {
         throw new Error("Authentication required. Please log in again.");
       }
 
-      const response = await fetch("/api/upload/s3", {
+      // Step 1: Request a presigned POST from our API
+      const presignedPostResponse = await fetch("/api/upload/s3", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+        }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Upload failed");
+      if (!presignedPostResponse.ok) {
+        const errorData = await presignedPostResponse.json();
+        throw new Error(errorData.error || "Failed to get upload credentials");
       }
 
-      const result = await response.json();
+      const presignedData = await presignedPostResponse.json();
+      
+      if (!presignedData.success || !presignedData.presignedPost) {
+        throw new Error(presignedData.error || "Failed to get upload credentials");
+      }
 
+      // Step 2: Upload the file directly to S3 using the presigned POST
+      // Create a FormData object and append all the required fields
+      const formData = new FormData();
+      
+      // Add all the fields from the presigned post
+      Object.entries(presignedData.presignedPost.fields).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+      
+      // Append the actual file as the last field
+      formData.append('file', file);
+      
+      // Upload directly to S3
+      const uploadResponse = await fetch(presignedData.presignedPost.url, {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (uploadResponse.status !== 204 && uploadResponse.status !== 200) {
+        throw new Error(`Upload failed with status: ${uploadResponse.status}`);
+      }
+      
+      // Step 3: Confirm the upload with our API
+      const confirmResponse = await fetch("/api/upload/s3", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          key: presignedData.key,
+          fileName: file.name,
+          size: file.size,
+        }),
+      });
+      
+      if (!confirmResponse.ok) {
+        const errorData = await confirmResponse.json();
+        throw new Error(errorData.error || "Failed to confirm upload");
+      }
+      
+      const result = await confirmResponse.json();
+      
       if (!result.success) {
-        throw new Error(result.error || "Failed to upload video");
+        throw new Error(result.error || "Upload confirmation failed");
       }
 
-      updateModule(moduleId, { videoUrl: result.url });
+      updateModule(moduleId, { videoUrl: result.url || presignedData.publicUrl });
       toast.success("Video uploaded successfully!");
     } catch (error) {
       console.error("Error uploading video:", error);
-      toast.error("Failed to upload video");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to upload video"
+      );
     } finally {
       setUploadingVideo(null);
     }
   };
 
-  // Upload file/document
+  // Upload file/document using S3 with signed POST request
   const uploadFile = async (file: File, moduleId: string) => {
     setUploadingFile(moduleId);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      // Validate document file
+      const validation = validateFile(file, false);
+      if (!validation.valid) {
+        throw new Error(validation.error);
+      }
 
+      // Get authentication token
       const token = localStorage.getItem("supabase_access_token");
       if (!token) {
         throw new Error("Authentication required. Please log in again.");
       }
 
-      const response = await fetch("/api/upload/s3", {
+      // Step 1: Request a presigned POST from our API
+      const presignedPostResponse = await fetch("/api/upload/s3", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+        }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Upload failed");
+      if (!presignedPostResponse.ok) {
+        const errorData = await presignedPostResponse.json();
+        throw new Error(errorData.error || "Failed to get upload credentials");
       }
 
-      const result = await response.json();
+      const presignedData = await presignedPostResponse.json();
+      
+      if (!presignedData.success || !presignedData.presignedPost) {
+        throw new Error(presignedData.error || "Failed to get upload credentials");
+      }
 
+      // Step 2: Upload the file directly to S3 using the presigned POST
+      // Create a FormData object and append all the required fields
+      const formData = new FormData();
+      
+      // Add all the fields from the presigned post
+      Object.entries(presignedData.presignedPost.fields).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+      
+      // Append the actual file as the last field
+      formData.append('file', file);
+      
+      // Upload directly to S3
+      const uploadResponse = await fetch(presignedData.presignedPost.url, {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (uploadResponse.status !== 204 && uploadResponse.status !== 200) {
+        throw new Error(`Upload failed with status: ${uploadResponse.status}`);
+      }
+      
+      // Step 3: Confirm the upload with our API
+      const confirmResponse = await fetch("/api/upload/s3", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          key: presignedData.key,
+          fileName: file.name,
+          size: file.size,
+        }),
+      });
+      
+      if (!confirmResponse.ok) {
+        const errorData = await confirmResponse.json();
+        throw new Error(errorData.error || "Failed to confirm upload");
+      }
+      
+      const result = await confirmResponse.json();
+      
       if (!result.success) {
-        throw new Error(result.error || "Failed to upload document");
+        throw new Error(result.error || "Upload confirmation failed");
       }
 
       updateModule(moduleId, {
-        fileUrl: result.url,
-        fileName: result.fileName,
+        fileUrl: result.url || presignedData.publicUrl,
+        fileName: result.fileName || file.name,
       });
       toast.success("Document uploaded successfully!");
     } catch (error) {
       console.error("Error uploading file:", error);
-      toast.error("Failed to upload document");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to upload document"
+      );
     } finally {
       setUploadingFile(null);
     }
