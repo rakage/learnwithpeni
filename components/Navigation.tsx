@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import { BookOpen, User, LogOut } from "lucide-react";
+import { BookOpen, User, LogOut, ChevronDown, Settings } from "lucide-react";
 
 interface NavigationProps {
   showUserMenu?: boolean;
@@ -13,6 +13,8 @@ interface NavigationProps {
 export default function Navigation({ showUserMenu = true }: NavigationProps) {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -42,13 +44,35 @@ export default function Navigation({ showUserMenu = true }: NavigationProps) {
     };
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
+      setDropdownOpen(false);
       // User state will be updated automatically by the auth state change listener
     } catch (error) {
       console.error("Error signing out:", error);
     }
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
   };
 
   if (loading) {
@@ -100,30 +124,102 @@ export default function Navigation({ showUserMenu = true }: NavigationProps) {
                   >
                     Dashboard
                   </Link>
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center space-x-2">
-                      {user.user_metadata?.avatar_url ? (
-                        <Image
-                          src={user.user_metadata.avatar_url}
-                          alt={user.user_metadata?.name || user.email}
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <User className="h-8 w-8 text-gray-400" />
-                      )}
-                      <span className="text-gray-700 text-sm">
-                        {user.user_metadata?.name || user.email}
-                      </span>
-                    </div>
+
+                  {/* User Profile Dropdown */}
+                  <div className="relative" ref={dropdownRef}>
                     <button
-                      onClick={handleSignOut}
-                      className="text-gray-600 hover:text-gray-900 flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium"
+                      onClick={toggleDropdown}
+                      className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                     >
-                      <LogOut className="h-4 w-4" />
-                      <span>Sign Out</span>
+                      <div className="flex items-center space-x-2">
+                        {user.user_metadata?.avatar_url ? (
+                          <Image
+                            src={user.user_metadata.avatar_url}
+                            alt={user.user_metadata?.name || user.email}
+                            width={32}
+                            height={32}
+                            className="rounded-full"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                            <User className="h-5 w-5 text-primary-600" />
+                          </div>
+                        )}
+                        <span className="hidden sm:block">
+                          {user.user_metadata?.name ||
+                            user.email?.split("@")[0]}
+                        </span>
+                      </div>
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform duration-200 ${
+                          dropdownOpen ? "rotate-180" : ""
+                        }`}
+                      />
                     </button>
+
+                    {/* Dropdown Menu */}
+                    {dropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                        {/* User Info Header */}
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <div className="flex items-center space-x-3">
+                            {user.user_metadata?.avatar_url ? (
+                              <Image
+                                src={user.user_metadata.avatar_url}
+                                alt={user.user_metadata?.name || user.email}
+                                width={40}
+                                height={40}
+                                className="rounded-full"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                <User className="h-6 w-6 text-primary-600" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {user.user_metadata?.name || "User"}
+                              </p>
+                              <p className="text-sm text-gray-500 truncate">
+                                {user.email}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Menu Items */}
+                        <div className="py-1">
+                          <Link
+                            href="/dashboard"
+                            onClick={() => setDropdownOpen(false)}
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                          >
+                            <BookOpen className="h-4 w-4 mr-3" />
+                            Dashboard
+                          </Link>
+
+                          <Link
+                            href="/profile"
+                            onClick={() => setDropdownOpen(false)}
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                          >
+                            <Settings className="h-4 w-4 mr-3" />
+                            Profile Settings
+                          </Link>
+                        </div>
+
+                        {/* Sign Out */}
+                        <div className="border-t border-gray-100 py-1">
+                          <button
+                            onClick={handleSignOut}
+                            className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700"
+                          >
+                            <LogOut className="h-4 w-4 mr-3" />
+                            Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </>
               )

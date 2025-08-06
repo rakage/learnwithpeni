@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
         name: user.name,
         role: user.role,
+        created_at: user.created_at,
       },
     });
   } catch (error) {

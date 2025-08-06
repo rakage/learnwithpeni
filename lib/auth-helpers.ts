@@ -188,6 +188,7 @@ export async function checkUserAuth() {
         email: true,
         name: true,
         role: true,
+        created_at: true,
       },
     });
 
