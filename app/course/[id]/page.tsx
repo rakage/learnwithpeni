@@ -471,17 +471,6 @@ export default function CoursePage() {
               ></div>
             </div>
           </div>
-
-          {course.isEnrolled && (
-            <div className="mb-4 p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <span className="text-sm font-medium text-green-800">
-                  Enrolled Student
-                </span>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="px-4 pb-4">
