@@ -389,7 +389,7 @@ const testimonials = [
 // Course offerings that integrate with the Duitku payment system
 const courseOfferings = [
   {
-    id: "remote-work-basic", // This should match course IDs in your database
+    id: "cmdwtrykk0001dcmbb33orwwd", // This should match course IDs in your database
     title: "Remote Work Basics",
     price: 299000, // IDR 299,000
     popular: false,
@@ -402,7 +402,7 @@ const courseOfferings = [
     ],
   },
   {
-    id: "remote-work-premium", // This should match course IDs in your database
+    id: "cmdy0xvzm0001mrw5oga3jd6f", // This should match course IDs in your database
     title: "Remote Work Mastery",
     price: 599000, // IDR 599,000
     popular: true,
