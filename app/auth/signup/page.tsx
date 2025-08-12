@@ -42,20 +42,7 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      // Verify reCAPTCHA on backend first
-      const captchaResponse = await fetch("/api/auth/verify-captcha", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token: recaptchaToken }),
-      });
-
-      if (!captchaResponse.ok) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
-      // Use our API route for registration
+      // Use our API route for registration (it will verify reCAPTCHA internally)
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {

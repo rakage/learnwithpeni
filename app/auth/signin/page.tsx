@@ -29,8 +29,8 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      // Verify reCAPTCHA on backend
-      const captchaResponse = await fetch("/api/auth/verify-captcha", {
+      // Verify reCAPTCHA first
+      const captchaResult = await fetch("/api/auth/verify-captcha", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,8 +38,12 @@ export default function SignInPage() {
         body: JSON.stringify({ token: recaptchaToken }),
       });
 
-      if (!captchaResponse.ok) {
-        throw new Error("reCAPTCHA verification failed");
+      if (!captchaResult.ok) {
+        toast.error("reCAPTCHA verification failed");
+        // Reset reCAPTCHA on error
+        recaptchaRef.current?.reset();
+        setRecaptchaToken(null);
+        return;
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({

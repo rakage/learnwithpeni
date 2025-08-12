@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { prisma } from "@/lib/prisma";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export async function POST(request: NextRequest) {
   console.log("=== USER REGISTRATION ===");
@@ -8,6 +9,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     console.log("📝 Registration request received for:", body.email);
+    console.log("🔍 Request body keys:", Object.keys(body));
+    console.log("🔍 reCAPTCHA token present:", !!body.recaptchaToken);
+    console.log("🔍 reCAPTCHA token length:", body.recaptchaToken?.length || 0);
 
     const { email, password, name, recaptchaToken } = body;
 
@@ -33,35 +37,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify reCAPTCHA token
-    try {
-      const captchaResponse = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-        }/api/auth/verify-captcha`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token: recaptchaToken }),
-        }
-      );
+    // Verify reCAPTCHA token directly
+    console.log("🔐 Verifying reCAPTCHA token...");
+    const captchaResult = await verifyRecaptcha(recaptchaToken);
 
-      if (!captchaResponse.ok) {
-        console.log("❌ reCAPTCHA verification failed");
-        return NextResponse.json(
-          { error: "reCAPTCHA verification failed" },
-          { status: 400 }
-        );
-      }
-    } catch (captchaError) {
-      console.error("❌ reCAPTCHA verification error:", captchaError);
+    if (!captchaResult.success) {
+      console.log("❌ reCAPTCHA verification failed:", captchaResult.error);
       return NextResponse.json(
-        { error: "reCAPTCHA verification failed" },
+        { error: captchaResult.error || "reCAPTCHA verification failed" },
         { status: 400 }
       );
     }
+
+    console.log("✅ reCAPTCHA verification successful");
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
