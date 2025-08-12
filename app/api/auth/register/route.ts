@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log("📝 Registration request received for:", body.email);
 
-    const { email, password, name } = body;
+    const { email, password, name, recaptchaToken } = body;
 
     // Validate required fields
     if (!email || !password || !name) {
@@ -20,6 +20,45 @@ export async function POST(request: NextRequest) {
       });
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Validate reCAPTCHA token
+    if (!recaptchaToken) {
+      console.log("❌ Missing reCAPTCHA token");
+      return NextResponse.json(
+        { error: "reCAPTCHA verification required" },
+        { status: 400 }
+      );
+    }
+
+    // Verify reCAPTCHA token
+    try {
+      const captchaResponse = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        }/api/auth/verify-captcha`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token: recaptchaToken }),
+        }
+      );
+
+      if (!captchaResponse.ok) {
+        console.log("❌ reCAPTCHA verification failed");
+        return NextResponse.json(
+          { error: "reCAPTCHA verification failed" },
+          { status: 400 }
+        );
+      }
+    } catch (captchaError) {
+      console.error("❌ reCAPTCHA verification error:", captchaError);
+      return NextResponse.json(
+        { error: "reCAPTCHA verification failed" },
         { status: 400 }
       );
     }
@@ -43,6 +82,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if email already exists in database
+    console.log("🔍 Checking if email already exists...");
+    try {
+      const existingUser = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+      });
+
+      if (existingUser) {
+        console.log("❌ Email already registered:", email);
+        return NextResponse.json(
+          {
+            error:
+              "An account with this email already exists. Please sign in instead.",
+          },
+          { status: 409 }
+        );
+      }
+    } catch (dbError) {
+      console.log("⚠️ Error checking existing email:", dbError);
+      // Continue with registration
+    }
+
     console.log("🔐 Creating user in Supabase Auth...");
 
     // Create user in Supabase Auth
@@ -59,6 +120,18 @@ export async function POST(request: NextRequest) {
 
     if (authError) {
       console.log("❌ Supabase Auth error:", authError.message);
+
+      // Handle specific Supabase auth errors
+      if (authError.message.includes("User already registered")) {
+        return NextResponse.json(
+          {
+            error:
+              "An account with this email already exists. Please sign in instead.",
+          },
+          { status: 409 }
+        );
+      }
+
       return NextResponse.json({ error: authError.message }, { status: 400 });
     }
 
@@ -72,15 +145,26 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ User created in Supabase Auth:", authData.user.id);
 
-    // Check if user already exists in database (in case of retry)
+    // Check if user was already created by Supabase trigger
     let dbUser;
     try {
+      console.log("🔍 Checking if user was created by trigger...");
       dbUser = await prisma.user.findUnique({
         where: { id: authData.user.id },
       });
 
       if (dbUser) {
-        console.log("👤 User already exists in database");
+        console.log("✅ User already created by Supabase trigger:", dbUser.id);
+
+        // Update the name if it's different (trigger uses email as fallback)
+        if (dbUser.name !== name && name) {
+          console.log("🔄 Updating user name...");
+          dbUser = await prisma.user.update({
+            where: { id: authData.user.id },
+            data: { name: name },
+          });
+        }
+
         return NextResponse.json({
           success: true,
           user: {
@@ -89,22 +173,22 @@ export async function POST(request: NextRequest) {
             name: dbUser.name,
             role: dbUser.role,
           },
-          message: "User already registered",
+          message: "Registration successful",
         });
       }
     } catch (findError) {
-      console.log("⚠️ Error checking existing user:", findError);
-      // Continue with creation
+      console.log("⚠️ Error checking for existing user:", findError);
+      // Continue with manual creation
     }
 
-    // Create user in our database
+    // Create user in our database (fallback if trigger didn't work)
     try {
-      console.log("💾 Creating user in database...");
+      console.log("💾 Creating user in database manually...");
 
       dbUser = await prisma.user.create({
         data: {
           id: authData.user.id,
-          email: authData.user.email!,
+          email: authData.user.email!.toLowerCase(),
           name: name,
           role: "STUDENT", // Default role
         },
@@ -125,47 +209,69 @@ export async function POST(request: NextRequest) {
     } catch (dbError: any) {
       console.error("❌ Database error:", dbError);
 
-      // Check if it's a unique constraint violation
-      if (dbError.code === "P2002") {
-        console.log("⚠️ User already exists (unique constraint)");
-        // Try to find the existing user
+      // Check if it's a unique constraint violation on ID (trigger already created user)
+      if (dbError.code === "P2002" && dbError.meta?.target?.includes("id")) {
+        console.log(
+          "🔄 User was created by trigger during our attempt, fetching..."
+        );
+
         try {
-          const existingUser = await prisma.user.findUnique({
+          dbUser = await prisma.user.findUnique({
             where: { id: authData.user.id },
           });
 
-          if (existingUser) {
+          if (dbUser) {
+            // Update the name if needed
+            if (dbUser.name !== name && name) {
+              dbUser = await prisma.user.update({
+                where: { id: authData.user.id },
+                data: { name: name },
+              });
+            }
+
             return NextResponse.json({
               success: true,
               user: {
-                id: existingUser.id,
-                email: existingUser.email,
-                name: existingUser.name,
-                role: existingUser.role,
+                id: dbUser.id,
+                email: dbUser.email,
+                name: dbUser.name,
+                role: dbUser.role,
               },
-              message: "User already registered",
+              message: "Registration successful",
             });
           }
-        } catch (findError) {
-          console.error("Error finding existing user:", findError);
+        } catch (fetchError) {
+          console.error(
+            "❌ Failed to fetch user created by trigger:",
+            fetchError
+          );
         }
       }
 
-      // User was created in Supabase but failed in our DB
-      // This is okay - the user can still login and the trigger might handle it
-      console.log("⚠️ User created in Supabase but database sync failed");
-      return NextResponse.json({
-        success: true,
-        user: {
-          id: authData.user.id,
-          email: authData.user.email,
-          name: name,
-          role: "STUDENT",
-        },
-        warning:
-          "User created in auth but database sync pending. You can still sign in.",
-        message: "Registration completed with minor sync issue",
-      });
+      // Check if it's a unique constraint violation on email
+      if (dbError.code === "P2002" && dbError.meta?.target?.includes("email")) {
+        // Clean up Supabase user if database creation failed due to existing email
+        try {
+          await supabase.auth.admin.deleteUser(authData.user.id);
+          console.log("🧹 Cleaned up Supabase user after email conflict");
+        } catch (cleanupError) {
+          console.error("❌ Failed to cleanup Supabase user:", cleanupError);
+        }
+
+        return NextResponse.json(
+          {
+            error:
+              "An account with this email already exists. Please sign in instead.",
+          },
+          { status: 409 }
+        );
+      }
+
+      // Other database errors
+      return NextResponse.json(
+        { error: "Failed to create user account. Please try again." },
+        { status: 500 }
+      );
     }
   } catch (error: any) {
     console.error("❌ Registration error:", error);
