@@ -443,13 +443,13 @@ export class DuitkuHelper {
 
   // Get callback URL
   static getCallbackUrl(): string {
-    const baseUrl = "https://f287c11984de.ngrok-free.app/";
+    const baseUrl = "https://learnwithpeni.my.id";
     return `${baseUrl}/api/webhook/duitku`;
   }
 
   // Get return URL
   static getReturnUrl(courseId?: string): string {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const baseUrl = "https://learnwithpeni.my.id";
     return courseId
       ? `${baseUrl}/payment/success?courseId=${courseId}`
       : `${baseUrl}/payment/success`;
