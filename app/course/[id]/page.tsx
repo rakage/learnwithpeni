@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { apiGet, apiPost } from "@/lib/auth-client";
 import ProtectedVideoPlayer from "@/components/ProtectedVideoPlayer";
+import RichTextDisplay from "@/components/RichTextDisplay";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import {
@@ -626,11 +627,9 @@ export default function CoursePage() {
 
                 {currentModule.type === "TEXT" && currentModule.content && (
                   <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
-                    <div
+                    <RichTextDisplay
+                      content={currentModule.content}
                       className="prose prose-lg max-w-none"
-                      dangerouslySetInnerHTML={{
-                        __html: currentModule.content,
-                      }}
                     />
                   </div>
                 )}

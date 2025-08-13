@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 import Navigation from "@/components/Navigation";
+import RichTextEditor from "@/components/RichTextEditor";
 
 interface Module {
   id: string;
@@ -224,33 +225,37 @@ export default function EditCoursePage() {
       }
 
       const presignedData = await presignedPostResponse.json();
-      
+
       if (!presignedData.success || !presignedData.presignedPost) {
-        throw new Error(presignedData.error || "Failed to get upload credentials");
+        throw new Error(
+          presignedData.error || "Failed to get upload credentials"
+        );
       }
 
       // Step 2: Upload the file directly to S3 using the presigned POST
       // Create a FormData object and append all the required fields
       const formData = new FormData();
-      
+
       // Add all the fields from the presigned post
-      Object.entries(presignedData.presignedPost.fields).forEach(([key, value]) => {
-        formData.append(key, value as string);
-      });
-      
+      Object.entries(presignedData.presignedPost.fields).forEach(
+        ([key, value]) => {
+          formData.append(key, value as string);
+        }
+      );
+
       // Append the actual file as the last field
-      formData.append('file', file);
-      
+      formData.append("file", file);
+
       // Upload directly to S3
       const uploadResponse = await fetch(presignedData.presignedPost.url, {
         method: "POST",
         body: formData,
       });
-      
+
       if (uploadResponse.status !== 204 && uploadResponse.status !== 200) {
         throw new Error(`Upload failed with status: ${uploadResponse.status}`);
       }
-      
+
       // Step 3: Confirm the upload with our API
       const confirmResponse = await fetch("/api/upload/s3", {
         method: "PUT",
@@ -264,19 +269,22 @@ export default function EditCoursePage() {
           size: file.size,
         }),
       });
-      
+
       if (!confirmResponse.ok) {
         const errorData = await confirmResponse.json();
         throw new Error(errorData.error || "Failed to confirm upload");
       }
-      
+
       const result = await confirmResponse.json();
-      
+
       if (!result.success) {
         throw new Error(result.error || "Upload confirmation failed");
       }
 
-      setCourseData((prev) => ({ ...prev!, imageUrl: result.url || presignedData.publicUrl }));
+      setCourseData((prev) => ({
+        ...prev!,
+        imageUrl: result.url || presignedData.publicUrl,
+      }));
       toast.success("Course image updated successfully!");
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -325,33 +333,37 @@ export default function EditCoursePage() {
       }
 
       const presignedData = await presignedPostResponse.json();
-      
+
       if (!presignedData.success || !presignedData.presignedPost) {
-        throw new Error(presignedData.error || "Failed to get upload credentials");
+        throw new Error(
+          presignedData.error || "Failed to get upload credentials"
+        );
       }
 
       // Step 2: Upload the file directly to S3 using the presigned POST
       // Create a FormData object and append all the required fields
       const formData = new FormData();
-      
+
       // Add all the fields from the presigned post
-      Object.entries(presignedData.presignedPost.fields).forEach(([key, value]) => {
-        formData.append(key, value as string);
-      });
-      
+      Object.entries(presignedData.presignedPost.fields).forEach(
+        ([key, value]) => {
+          formData.append(key, value as string);
+        }
+      );
+
       // Append the actual file as the last field
-      formData.append('file', file);
-      
+      formData.append("file", file);
+
       // Upload directly to S3
       const uploadResponse = await fetch(presignedData.presignedPost.url, {
         method: "POST",
         body: formData,
       });
-      
+
       if (uploadResponse.status !== 204 && uploadResponse.status !== 200) {
         throw new Error(`Upload failed with status: ${uploadResponse.status}`);
       }
-      
+
       // Step 3: Confirm the upload with our API
       const confirmResponse = await fetch("/api/upload/s3", {
         method: "PUT",
@@ -365,19 +377,21 @@ export default function EditCoursePage() {
           size: file.size,
         }),
       });
-      
+
       if (!confirmResponse.ok) {
         const errorData = await confirmResponse.json();
         throw new Error(errorData.error || "Failed to confirm upload");
       }
-      
+
       const result = await confirmResponse.json();
-      
+
       if (!result.success) {
         throw new Error(result.error || "Upload confirmation failed");
       }
 
-      updateModule(moduleId, { videoUrl: result.url || presignedData.publicUrl });
+      updateModule(moduleId, {
+        videoUrl: result.url || presignedData.publicUrl,
+      });
       toast.success("Video uploaded successfully!");
     } catch (error) {
       console.error("Error uploading video:", error);
@@ -426,33 +440,37 @@ export default function EditCoursePage() {
       }
 
       const presignedData = await presignedPostResponse.json();
-      
+
       if (!presignedData.success || !presignedData.presignedPost) {
-        throw new Error(presignedData.error || "Failed to get upload credentials");
+        throw new Error(
+          presignedData.error || "Failed to get upload credentials"
+        );
       }
 
       // Step 2: Upload the file directly to S3 using the presigned POST
       // Create a FormData object and append all the required fields
       const formData = new FormData();
-      
+
       // Add all the fields from the presigned post
-      Object.entries(presignedData.presignedPost.fields).forEach(([key, value]) => {
-        formData.append(key, value as string);
-      });
-      
+      Object.entries(presignedData.presignedPost.fields).forEach(
+        ([key, value]) => {
+          formData.append(key, value as string);
+        }
+      );
+
       // Append the actual file as the last field
-      formData.append('file', file);
-      
+      formData.append("file", file);
+
       // Upload directly to S3
       const uploadResponse = await fetch(presignedData.presignedPost.url, {
         method: "POST",
         body: formData,
       });
-      
+
       if (uploadResponse.status !== 204 && uploadResponse.status !== 200) {
         throw new Error(`Upload failed with status: ${uploadResponse.status}`);
       }
-      
+
       // Step 3: Confirm the upload with our API
       const confirmResponse = await fetch("/api/upload/s3", {
         method: "PUT",
@@ -466,14 +484,14 @@ export default function EditCoursePage() {
           size: file.size,
         }),
       });
-      
+
       if (!confirmResponse.ok) {
         const errorData = await confirmResponse.json();
         throw new Error(errorData.error || "Failed to confirm upload");
       }
-      
+
       const result = await confirmResponse.json();
-      
+
       if (!result.success) {
         throw new Error(result.error || "Upload confirmation failed");
       }
@@ -1159,11 +1177,9 @@ function ModuleEditor({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Text Content *
             </label>
-            <textarea
+            <RichTextEditor
               value={module.content || ""}
-              onChange={(e) => onUpdate({ content: e.target.value })}
-              rows={6}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              onChange={(content: string) => onUpdate({ content })}
               placeholder="Enter your lesson content here..."
             />
           </div>
