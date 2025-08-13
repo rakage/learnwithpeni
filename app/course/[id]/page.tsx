@@ -432,9 +432,10 @@ export default function CoursePage() {
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed inset-y-0 left-0 z-40 w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out`}
+        } fixed inset-y-0 left-0 z-40 w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out flex flex-col`}
       >
-        <div className="flex items-center justify-between p-4 border-b">
+        {/* Fixed Header */}
+        <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
           <Link href="/dashboard" className="flex items-center space-x-2">
             <BookOpen className="h-6 w-6 text-primary-600" />
             <span className="font-semibold text-gray-900">
@@ -446,7 +447,8 @@ export default function CoursePage() {
           </button>
         </div>
 
-        <div className="p-4">
+        {/* Fixed Course Info */}
+        <div className="p-4 flex-shrink-0">
           <div className="flex items-center space-x-2 mb-2">
             <h2 className="text-lg font-bold text-gray-900">{course.title}</h2>
             {user?.role === "ADMIN" && (
@@ -473,10 +475,15 @@ export default function CoursePage() {
           </div>
         </div>
 
-        <div className="px-4 pb-4">
+        {/* Fixed Modules Header */}
+        <div className="px-4 pb-2 flex-shrink-0">
           <h3 className="text-sm font-medium text-gray-900 mb-3">
             Course Modules
           </h3>
+        </div>
+
+        {/* Scrollable Modules List */}
+        <div className="flex-1 overflow-y-auto px-4 pb-4 min-h-0">
           <div className="space-y-2">
             {course.modules.map((module, index) => (
               <button
