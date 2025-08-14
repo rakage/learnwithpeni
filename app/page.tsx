@@ -1,55 +1,39 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle, Star, Users, Clock, BookOpen, Award } from "lucide-react";
-import Navigation from "@/components/Navigation";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <Navigation />
-
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-50 to-accent-50 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
-            <div className="mb-8 lg:mb-0">
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                Master <span className="text-primary-600">Remote Work</span>{" "}
-                Like a Pro
+      {/* Hero Section - Updated to match the image */}
+      <section className="relative py-0 min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-400 via-orange-400 to-pink-500">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-center w-full max-w-6xl mx-auto min-h-screen">
+            <div className="text-center md:text-left md:w-1/2 p-4">
+              <h1 className="text-left text-4xl md:text-5xl lg:text-6xl font-bold text-black mb-4 leading-tight">
+                Ingin Gaji Dua Digit dan Kerja dari Mana Saja?
               </h1>
-              <p className="text-xl text-gray-600 mb-8">
-                Transform your career with our comprehensive Remote Work Mastery
-                course. Learn the skills, tools, and mindset needed to thrive in
-                the remote work era.
+              <h2 className="text-left text-2xl md:text-3xl lg:text-4xl font-bold text-pink-600 mb-6">
+                Ini Kesempatanmu!
+              </h2>
+              <p className="text-left text-lg md:text-xl text-black mb-8 leading-relaxed">
+                Dengan pengalaman dan strategi yang terbukti, aku siap bantu
+                kamu meraih pekerjaan remote impianmu!
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/auth/signup"
-                  className="bg-primary-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary-700 transition-colors text-center"
-                >
-                  Start Learning Now
-                </Link>
-                <button className="border-2 border-primary-600 text-primary-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary-50 transition-colors">
-                  Watch Preview
-                </button>
-              </div>
-              <div className="flex items-center mt-6 text-sm text-gray-600">
-                <Users className="h-5 w-5 mr-2" />
-                <span>1,234+ students enrolled</span>
-                <div className="flex items-center ml-6">
-                  <Star className="h-5 w-5 text-yellow-400 mr-1" />
-                  <span>4.9/5 rating</span>
-                </div>
-              </div>
+              <Link
+                href="#paketKursus"
+                className="bg-pink-700 text-white text-lg font-semibold py-4 px-8 rounded-full hover:bg-pink-800 transition duration-300 inline-block shadow-lg"
+              >
+                TAKE ACTION SEKARANG
+              </Link>
             </div>
-            <div className="relative">
+            <div className="md:w-1/2 flex justify-center items-center">
               <Image
-                src="/api/placeholder/600/400"
-                alt="Remote Work Mastery Course"
-                width={600}
-                height={400}
-                className="rounded-lg shadow-2xl"
+                src="/2789bdfe15e51a219051122cd1bcf9d2786c73ba_s2_n3_y2.png"
+                alt="Peni - Remote Work Expert"
+                width={500}
+                height={600}
+                className="pointer-events-none select-none object-contain max-w-full h-auto"
                 priority
               />
             </div>
@@ -57,396 +41,639 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Course Highlights */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              What You'll Learn
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Comprehensive curriculum designed to make you a remote work expert
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {highlights.map((highlight, index) => (
-              <div key={index} className="bg-gray-50 p-6 rounded-lg">
-                <div className="flex items-center mb-4">
-                  <CheckCircle className="h-6 w-6 text-green-500 mr-3" />
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {highlight.title}
-                  </h3>
-                </div>
-                <p className="text-gray-600">{highlight.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              What Students Say
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-4">"{testimonial.content}"</p>
-                <div className="flex items-center">
-                  <Image
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    width={40}
-                    height={40}
-                    className="rounded-full mr-3"
-                  />
-                  <div>
-                    <div className="font-semibold text-gray-900">
-                      {testimonial.name}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {testimonial.role}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Instructor Profile */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
-            <div className="mb-8 lg:mb-0">
-              <Image
-                src="/api/placeholder/400/400"
-                alt="Instructor Peni"
-                width={400}
-                height={400}
-                className="rounded-lg shadow-lg mx-auto"
-              />
-            </div>
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                Meet Your Instructor
-              </h2>
-              <h3 className="text-2xl font-semibold text-primary-600 mb-4">
-                Peni Johnson
-              </h3>
-              <p className="text-lg text-gray-600 mb-6">
-                Remote Work Expert & Digital Nomad with 8+ years of experience
-                helping professionals transition to successful remote careers.
-                Featured in Forbes, TechCrunch, and Remote Year.
-              </p>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-600">
-                    5000+
-                  </div>
-                  <div className="text-gray-600">Students Taught</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-600">8+</div>
-                  <div className="text-gray-600">Years Experience</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-600">
-                    4.9/5
-                  </div>
-                  <div className="text-gray-600">Average Rating</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-600">50+</div>
-                  <div className="text-gray-600">Countries Visited</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section className="py-20 bg-primary-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Choose Your Plan
-            </h2>
-            <p className="text-xl text-gray-600">
-              Invest in your remote work future today
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-8">
-            {courseOfferings.map((course, index) => (
+      {/* Three Signs Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h1 className="text-center text-2xl md:text-3xl font-bold text-pink-700 mb-12">
+            3 Tanda Kalau Sekarang Sudah Saatnya Kamu Coba Kerja Remote di
+            Bidang Digital Marketing!!
+          </h1>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {threeSignsData.map((sign, index) => (
               <div
-                key={course.id}
-                className={`bg-white p-8 rounded-lg shadow-sm ${
-                  course.popular ? "border-2 border-primary-600 relative" : ""
-                }`}
+                key={index}
+                className="bg-pink-100 rounded-lg p-6 shadow-lg hover:transform hover:-translate-y-2 transition-all duration-300"
               >
-                {course.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  {course.title}
+                <div className="text-center mb-4">
+                  <Image
+                    src={sign.icon}
+                    alt={sign.title}
+                    width={50}
+                    height={50}
+                    className="mx-auto"
+                  />
+                </div>
+                <h3 className="text-lg font-bold text-pink-700 mb-3">
+                  {sign.title}
                 </h3>
-                <div className="text-4xl font-bold text-primary-600 mb-2">
-                  {new Intl.NumberFormat("id-ID", {
-                    style: "currency",
-                    currency: "IDR",
-                    minimumFractionDigits: 0,
-                  }).format(course.price)}
+                <p className="text-gray-700">{sign.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="lg:w-1/3">
+              <h2 className="text-2xl md:text-3xl font-bold text-pink-700 mb-6">
+                Apa yang Bisa Kamu Dapatkan dengan Mengikuti Kursus Ini?
+              </h2>
+            </div>
+            <div className="lg:w-2/3 bg-pink-100 rounded-lg p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {benefitsData.map((benefit, index) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-lg p-4 shadow-md hover:transform hover:-translate-y-2 transition-all duration-300"
+                  >
+                    <div className="text-2xl mb-3">{benefit.icon}</div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">
+                      {benefit.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      {benefit.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Peni Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h1 className="text-center text-2xl md:text-3xl font-bold text-pink-700 mb-8">
+            Kenalan dulu yuk!
+          </h1>
+          <div className="text-center mb-12">
+            <p className="text-lg text-gray-700 max-w-4xl mx-auto">
+              Haii, perkenalkan namaku Peni. Aku memiliki pengalaman bekerja
+              dengan perusahaan-perusahaan di luar negeri secara remote dan
+              hybrid, seperti Edudrift (Singapore), Alem Health (Singapore),
+              Quizlet (USA), Stalinks (Hong Kong) dan berkolaborasi dengan
+              Samsung, Glints, EF, MySkill.
+            </p>
+          </div>
+
+          {/* Work Experience */}
+          <div className="mb-12">
+            <h2 className="text-xl font-bold text-pink-700 text-center mb-8">
+              Pengalaman Kerja
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {workExperienceData.map((company, index) => (
+                <div key={index} className="text-center">
+                  <div className="mb-3">
+                    <Image
+                      src={company.logo}
+                      alt={`${company.name} Logo`}
+                      width={80}
+                      height={80}
+                      className="mx-auto object-contain hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <Image
+                      src={company.flag}
+                      alt={`${company.country} Flag`}
+                      width={32}
+                      height={20}
+                      className="mx-auto"
+                    />
+                  </div>
+                  <p className="text-sm text-pink-700 font-medium">
+                    {company.name}
+                  </p>
                 </div>
-                <div className="text-lg text-gray-600 font-normal mb-6">
-                  /lifetime access
+              ))}
+            </div>
+          </div>
+
+          {/* Collaboration */}
+          <div className="mb-12">
+            <h2 className="text-xl font-bold text-pink-700 text-center mb-8">
+              Kolaborasi
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {collaborationData.map((company, index) => (
+                <div key={index} className="text-center">
+                  <div className="mb-3">
+                    <Image
+                      src={company.logo}
+                      alt={`${company.name} Logo`}
+                      width={80}
+                      height={80}
+                      className="mx-auto object-contain hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <Image
+                      src={company.flag}
+                      alt={`${company.country} Flag`}
+                      width={32}
+                      height={20}
+                      className="mx-auto"
+                    />
+                  </div>
+                  <p className="text-sm text-pink-700 font-medium">
+                    {company.name}
+                  </p>
                 </div>
-                <ul className="space-y-3 mb-8">
-                  {course.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                      <span>{feature}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Photos */}
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-pink-700 mb-8">
+              Aku udah merasakan enak nya kerja remote, sekarang giliran kamu!
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {remoteWorkPhotos.map((photo, index) => (
+                <div key={index} className="relative">
+                  <Image
+                    src={photo}
+                    alt="Peni bekerja remote"
+                    width={300}
+                    height={200}
+                    className="rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h1 className="text-center text-2xl md:text-3xl font-bold text-gray-800 mb-12">
+            Bagaimana Cara Kerja Kursus Ini?
+          </h1>
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {howItWorksData.map((step, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-50 rounded-lg p-6 hover:transform hover:-translate-y-2 transition-all duration-300 shadow-md"
+                >
+                  <h3 className="text-lg font-bold text-pink-700 mb-3">
+                    {step.title}
+                  </h3>
+                  <div className="text-gray-600">
+                    {step.description.map((desc, idx) => (
+                      <p key={idx} className="mb-2">
+                        {desc}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="text-center mt-8">
+              <Link
+                href="#paketKursus"
+                className="bg-pink-700 text-white py-3 px-8 rounded-full text-lg font-semibold hover:bg-pink-800 transition-colors duration-300"
+              >
+                Take Action Sekarang
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="paketKursus" className="py-16 bg-white">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h1 className="text-center text-2xl md:text-3xl font-bold text-pink-700 mb-12">
+            Pilihan Paket Kursus
+          </h1>
+          <div className="flex justify-center">
+            <div className="relative bg-pink-100 rounded-lg p-8 shadow-xl max-w-4xl w-full border-2 border-pink-700">
+              <div className="absolute top-0 right-0 bg-pink-700 text-white px-4 py-1 rounded-bl-lg text-sm font-bold">
+                Exclusive for this month only!
+              </div>
+              <h2 className="text-2xl font-bold text-pink-700 mb-4">
+                Full Complete Package
+              </h2>
+              <div className="text-center mb-6">
+                <span className="block text-gray-500 line-through text-lg">
+                  Rp 1.999.000
+                </span>
+                <span className="block text-3xl font-bold text-pink-700">
+                  Rp 399.000
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-800 mb-4">
+                    Course Content:
+                  </h3>
+                  <ul className="space-y-2">
+                    {courseContentData.map((item, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-pink-700 mr-2 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-800 mb-4">
+                    Templates & Resources:
+                  </h3>
+                  <ul className="space-y-2">
+                    {templatesData.map((item, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-pink-700 mr-2 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-pink-700 text-white rounded-lg p-6 mb-8">
+                <h3 className="text-lg font-bold mb-3">Bonus:</h3>
+                <ul className="space-y-2">
+                  {bonusData.map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>{item}</span>
                     </li>
                   ))}
                 </ul>
+              </div>
+
+              <div className="text-center">
                 <Link
-                  href={`/payment?courseId=${course.id}`}
-                  className={`w-full px-6 py-3 rounded-lg text-center font-semibold transition-colors block ${
-                    course.popular
-                      ? "bg-primary-600 text-white hover:bg-primary-700"
-                      : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                  }`}
+                  href="/payment?courseId=cmdy0xvzm0001mrw5oga3jd6f"
+                  className="bg-pink-700 text-white py-4 px-8 rounded-lg text-xl font-bold hover:bg-pink-800 transition-colors duration-300 inline-block"
                 >
-                  Enroll Now - Pay with Indonesian Methods
+                  Belajar Sekarang
                 </Link>
-                <div className="mt-3 text-center text-sm text-gray-600">
-                  💳 BCA, Mandiri, ShopeePay, OVO, DANA & more
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600 mb-2">Offer ends in:</p>
+                  <div
+                    id="countdown"
+                    className="text-lg font-bold text-pink-700"
+                  >
+                    24h 0m 0s
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Payment Methods Preview */}
-          <div className="mt-12 text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">
-              Pay with your favorite Indonesian payment method
-            </h3>
-            <div className="flex flex-wrap justify-center items-center gap-4 opacity-75">
-              <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
-                <span className="text-sm font-medium text-gray-700">
-                  BCA Virtual Account
-                </span>
-              </div>
-              <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
-                <span className="text-sm font-medium text-gray-700">
-                  ShopeePay
-                </span>
-              </div>
-              <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
-                <span className="text-sm font-medium text-gray-700">OVO</span>
-              </div>
-              <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
-                <span className="text-sm font-medium text-gray-700">DANA</span>
-              </div>
-              <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
-                <span className="text-sm font-medium text-gray-700">
-                  Mandiri VA
-                </span>
-              </div>
-              <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
-                <span className="text-sm font-medium text-gray-700">QRIS</span>
-              </div>
-              <div className="text-sm text-gray-600">+ 15 more methods</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
-            </h2>
-          </div>
-          <div className="space-y-6">
-            {faqs.map((faq, index) => (
-              <div key={index} className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {faq.question}
-                </h3>
-                <p className="text-gray-600">{faq.answer}</p>
+      {/* Testimonials Section */}
+      <section className="py-16 bg-pink-100">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h2 className="text-center text-2xl md:text-3xl font-bold text-pink-700 mb-12">
+            Alumni Success Story
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {testimonialImages.map((image, index) => (
+              <div key={index} className="text-center">
+                <Image
+                  src={image}
+                  alt={`Testimonial ${index + 1}`}
+                  width={250}
+                  height={300}
+                  className="rounded-lg shadow-lg w-full h-auto"
+                />
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h2 className="text-center text-2xl md:text-3xl font-bold text-pink-700 mb-12">
+            FAQ
+          </h2>
+          <div className="space-y-4">
+            {faqData.map((faq, index) => (
+              <FAQItem
+                key={index}
+                question={faq.question}
+                answer={faq.answer}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="py-16 bg-pink-100">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-2xl font-bold text-pink-700 mb-4">
+            Contact or Support
+          </h2>
+          <p className="text-lg text-gray-700 mb-4">
+            Masih ada pertanyaan yang belum terjawab? Hubungi admin Triska untuk
+            bantuan lebih lanjut!
+          </p>
+          <p className="text-lg font-semibold text-gray-800 mb-6">
+            Contact Support: +62 878 6334 2502
+          </p>
+          <Link
+            href="https://wa.me/6287863342502"
+            target="_blank"
+            className="bg-green-500 text-white py-3 px-8 rounded-lg text-lg font-semibold hover:bg-green-600 transition-colors duration-300 inline-block"
+          >
+            Hubungi via WhatsApp
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <BookOpen className="h-8 w-8 text-primary-400" />
-              <span className="text-xl font-bold">Learn with Peni</span>
-            </div>
-            <p className="text-gray-400 mb-4">
-              Empowering remote workers worldwide
-            </p>
-            <div className="flex justify-center space-x-6">
-              <a href="#" className="text-gray-400 hover:text-white">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white">
-                Terms of Service
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white">
-                Contact
-              </a>
-            </div>
-            <p className="text-gray-400 mt-8">
-              © 2024 Learn with Peni. All rights reserved.
-            </p>
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <BookOpen className="h-8 w-8 text-pink-400" />
+            <span className="text-xl font-bold">Learn with Peni</span>
           </div>
+          <p className="text-gray-400 mb-4">
+            Empowering remote workers worldwide
+          </p>
+          <div className="flex justify-center space-x-6">
+            <a href="#" className="text-gray-400 hover:text-white">
+              Privacy Policy
+            </a>
+            <a href="#" className="text-gray-400 hover:text-white">
+              Terms of Service
+            </a>
+            <a href="#" className="text-gray-400 hover:text-white">
+              Contact
+            </a>
+          </div>
+          <p className="text-gray-400 mt-8">
+            © 2024 Learn with Peni. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>
   );
 }
 
-const highlights = [
+// FAQ Component
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  return (
+    <details className="group">
+      <summary className="flex justify-between items-center cursor-pointer bg-pink-700 text-white p-4 rounded-lg hover:bg-pink-800 transition-colors duration-300">
+        <span className="font-semibold">{question}</span>
+        <span className="transform group-open:rotate-180 transition-transform duration-300">
+          ▼
+        </span>
+      </summary>
+      <div className="mt-2 p-4 bg-white border border-pink-700 rounded-lg">
+        <p className="text-gray-700">{answer}</p>
+      </div>
+    </details>
+  );
+}
+
+// Data arrays
+const threeSignsData = [
   {
-    title: "Remote Work Fundamentals",
+    icon: "https://cdn-icons-png.freepik.com/512/2228/2228204.png?uid=R168537370&ga=GA1.1.230186156.1719331155",
+    title: "Capek Kerja Pulang-Pergi?",
     description:
-      "Master the basics of remote work including time management, communication, and productivity.",
+      "Pulang-pergi dan macet berjam-jam bikin lelah? Ini saatnya beralih ke kerja remote dan bebas dari stress di jalan!",
   },
   {
-    title: "Tools & Technology",
+    icon: "https://cdn-icons-png.freepik.com/512/5115/5115997.png?uid=R168537370&ga=GA1.1.230186156.1719331155",
+    title: "Sulit Dapetin Work-Life Balance?",
     description:
-      "Learn essential remote work tools like Slack, Zoom, Asana, and more.",
+      "Kerja remote memberikan kamu fleksibilitas waktu untuk mengatur kehidupan pribadi dan pekerjaan jadi lebih seimbang.",
   },
   {
-    title: "Work-Life Balance",
+    icon: "https://cdn-icons-png.freepik.com/512/1589/1589592.png?uid=R168537370&ga=GA1.1.230186156.1719331155",
+    title: "Karir Terasa Stuck?",
     description:
-      "Discover strategies to maintain healthy boundaries while working from home.",
-  },
-  {
-    title: "Building Remote Teams",
-    description:
-      "Leadership skills for managing and building effective remote teams.",
-  },
-  {
-    title: "Digital Nomad Lifestyle",
-    description:
-      "How to work remotely while traveling the world safely and efficiently.",
-  },
-  {
-    title: "Career Advancement",
-    description:
-      "Strategies for growing your career and getting promoted in remote roles.",
+      "Bekerja di dunia digital marketing secara remote membuka peluang lebih besar untuk berkembang dan meningkatkan karir secara global.",
   },
 ];
 
-const testimonials = [
+const benefitsData = [
   {
-    name: "Sarah Chen",
-    role: "Software Developer",
-    content:
-      "This course completely transformed how I work remotely. I'm now more productive than ever!",
-    avatar: "/api/placeholder/40/40",
+    icon: "📜",
+    title: "Sertifikat Bertaraf Internasional",
+    description:
+      "Pelajari tentang sertifikat digital marketing yang diakui secara internasional dan berharga di dunia kerja!",
   },
   {
-    name: "Mike Rodriguez",
-    role: "Marketing Manager",
-    content:
-      "Peni's insights on remote team management have been invaluable for my leadership role.",
-    avatar: "/api/placeholder/40/40",
+    icon: "🌍",
+    title: "Kesempatan Magang Remote",
+    description:
+      "Dapatkan informasi eksklusif tentang peluang magang remote di perusahaan luar negeri!",
   },
   {
-    name: "Emily Watson",
-    role: "UX Designer",
-    content:
-      "I landed my dream remote job just 2 months after completing this course. Highly recommended!",
-    avatar: "/api/placeholder/40/40",
+    icon: "💬",
+    title: "Akses Komunitas Eksklusif",
+    description:
+      "Akses eksklusif ke komunitas Discord dengan info loker remote mingguan.",
+  },
+  {
+    icon: "📚",
+    title: "Materi Terbukti",
+    description:
+      "Materi kursus yang sudah terbukti membantu mendapatkan pekerjaan remote bergaji dua digit.",
+  },
+  {
+    icon: "📝",
+    title: "Template CV & Portofolio",
+    description:
+      "Template CV, Portofolio, dan persiapan interview untuk memudahkan proses lamaran kerja.",
   },
 ];
 
-// Course offerings that integrate with the Duitku payment system
-const courseOfferings = [
+const workExperienceData = [
   {
-    id: "cmdwtrykk0001dcmbb33orwwd", // This should match course IDs in your database
-    title: "Remote Work Basics",
-    price: 299000, // IDR 299,000
-    popular: false,
-    features: [
-      "Complete course access",
-      "8+ video modules",
-      "Downloadable resources",
-      "Mobile access",
-      "Community forum access",
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOatG9IDeqK--6K-Sgz6fRmJs89a-vIt8b-g&s",
+    flag: "https://flagcdn.com/w320/sg.png",
+    name: "Edudrift (Singapura)",
+    country: "Singapore",
+  },
+  {
+    logo: "/1631391501791.jpg",
+    flag: "https://flagcdn.com/w320/sg.png",
+    name: "Alem Health (Singapura)",
+    country: "Singapore",
+  },
+  {
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjh288taWRXQIW1jdP5t4-ni_Q6VmXBW5KaQ&s",
+    flag: "https://flagcdn.com/w320/us.png",
+    name: "Quizlet (Amerika Serikat)",
+    country: "USA",
+  },
+  {
+    logo: "/stalinks_logo.jpg",
+    flag: "https://flagcdn.com/w320/hk.png",
+    name: "Stalinks (Hong Kong)",
+    country: "Hong Kong",
+  },
+];
+
+const collaborationData = [
+  {
+    logo: "https://images.samsung.com/is/image/samsung/assets/id/about-us/brand/logo/mo/256_144_1.png?$512_N_PNG$",
+    flag: "https://flagcdn.com/w320/kr.png",
+    name: "Samsung (Korea Selatan)",
+    country: "South Korea",
+  },
+  {
+    logo: "https://kontenesia.com/wp-content/uploads/2022/02/logo-glints.png",
+    flag: "https://flagcdn.com/w320/sg.png",
+    name: "Glints (Singapura)",
+    country: "Singapore",
+  },
+  {
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTetxzfx2_kUG9bCtbAMSRrdexmOLNe-HZCQA&s",
+    flag: "https://flagcdn.com/w320/us.png",
+    name: "EF (Amerika Serikat)",
+    country: "USA",
+  },
+  {
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ50JWhyL_6EPXYH3Cw16x0JAI7IlmposX74Q&s",
+    flag: "https://flagcdn.com/w320/id.png",
+    name: "MySkill (Indonesia)",
+    country: "Indonesia",
+  },
+];
+
+const remoteWorkPhotos = [
+  "https://i.imgur.com/8bOE6Eq.jpeg",
+  "https://i.imgur.com/gny2XNh.jpeg",
+  "https://i.imgur.com/Vcn2lI6.jpeg",
+];
+
+const howItWorksData = [
+  {
+    title: "Daftar Kursus Ini",
+    description: [
+      "Lakukan proses pendaftaraan dengan mudah dan bergabung dengan kursus ini!",
     ],
   },
   {
-    id: "cmdy0xvzm0001mrw5oga3jd6f", // This should match course IDs in your database
-    title: "Remote Work Mastery",
-    price: 599000, // IDR 599,000
-    popular: true,
-    features: [
-      "Everything in Basic",
-      "15+ advanced modules",
-      "1-on-1 coaching session",
-      "Certificate of completion",
-      "Private community access",
-      "Bonus templates & tools",
-      "Lifetime updates",
+    title: "Akses Semua Materi",
+    description: [
+      "Setelah mendaftar, kamu langsung bisa mengakses video, template dan panduan lengkap yang kami sediakan",
+    ],
+  },
+  {
+    title: "Belajar Sesuai Waktu Kamu",
+    description: [
+      "Kamu bisa belajar kapan saja dan dimana saja, sesuai dengan waktu luangmu.",
+    ],
+  },
+  {
+    title: "Hands-On Projects",
+    description: [
+      "Aku akan membagikan strategi efektif untuk mendapatkan magang remote di perusahaan luar negeri.",
+      "Jadi, kamu bisa langsung praktek apa yang dipelajari dari kursus ini dan memulai karier remote di digital marketing!",
+    ],
+  },
+  {
+    title: "Sertifikasi",
+    description: [
+      "Aku akan membagikan informasi eksklusif tentang sertifikat digital marketing bertaraf internasional yang akan membantu kamu mendapatkan pekerjaan remote impianmu!",
+    ],
+  },
+  {
+    title: "Ongoing Support",
+    description: [
+      "Bergabunglah dengan komunitas eksklusif kami untuk meraih sukses di pekerjaan remote!",
+      "Dapatkan wawasan berharga dari sesama anggota, bimbingan langsung dari mentor kami, Peni dan tim, serta informasi lowongan kerja remote setiap minggunya!",
     ],
   },
 ];
 
-const faqs = [
+const courseContentData = [
+  "Sertifikasi Digital Marketing Bertaraf Internasional",
+  "Interview 101 for a Remote Job",
+  "Get Your First Remote Internship in Digital Marketing",
+  "Applying for Remote Jobs",
+  "Personal Branding on LinkedIn",
+  "Mindset for Success in Remote Career",
+];
+
+const templatesData = [
+  "CV Template (Bahasa Indonesia & English)",
+  "Portfolio Template (Versi PDF & Situs Web)",
+  "Template Email Follow-Up ke Recruiter",
+  "Template Message to Send After Interview",
+  "Template FAQ in Interview",
+  "Template LinkedIn Banner",
+];
+
+const bonusData = [
+  "Komunitas Eksklusif - Bergabunglah dengan komunitas kami untuk mendapatkan info peluang kerja remote terbaru setiap minggu.",
+  "Mentor dan Support - Dapatkan dukungan langsung dari mentor kami, Peni & Tim, serta alumni yang siap membantu kamu mengembangkan karir remotemu.",
+];
+
+const testimonialImages = [
+  "/2.png",
+  "/3.png",
+  "/4.png",
+  "/6.png",
+  "/8.png",
+  "/9.png",
+  "/10.png",
+  "/11.png",
+  "/12.png",
+  "/13.png",
+  "/15.png",
+  "/16.png",
+];
+
+const faqData = [
   {
-    question: "How long do I have access to the course?",
+    question: "Apa itu Kerja Remote?",
     answer:
-      "You have lifetime access to all course materials. Learn at your own pace and revisit content anytime.",
+      "Kerja remote adalah sistem kerja di mana kamu bisa melakukan pekerjaan dari lokasi mana pun, tanpa harus datang ke kantor fisik. Pekerjaan dilakukan melalui internet, menggunakan alat komunikasi dan kolaborasi online. Dengan kerja remote, kamu bisa bekerja dari rumah, kafe, co-working space, atau bahkan sambil traveling, selama ada koneksi internet yang stabil.",
   },
   {
-    question: "Is this course suitable for beginners?",
+    question: "Apa itu digital marketing?",
     answer:
-      "Absolutely! This course is designed for anyone looking to improve their remote work skills, regardless of experience level.",
+      "Digital marketing adalah strategi pemasaran yang memanfaatkan media digital dan internet untuk mempromosikan produk atau jasa. Sebuah karir di bidang ini melibatkan berbagai peran seperti mengelola kampanye iklan online, menganalisis data, optimasi SEO, manajemen media sosial, dan pembuatan konten kreatif. Dengan permintaan yang terus meningkat, karir di digital marketing menawarkan fleksibilitas, termasuk opsi bekerja remote dan freelance, serta peluang kerja di berbagai industri.",
   },
   {
-    question: "What payment methods do you accept?",
+    question:
+      "Paket apa yang disarankan untuk diambil, starter atau full complete package?",
     answer:
-      "We accept all major Indonesian payment methods including BCA, Mandiri, BNI Virtual Accounts, ShopeePay, OVO, DANA, QRIS, and many more through our secure Duitku payment gateway.",
+      "Untuk kamu yang masih belum yakin dan ingin mencoba-coba terlebih dahulu, Starter Package adalah pilihan yang cocok. Paket ini memungkinkan kamu untuk mendapatkan gambaran dasar tentang digital marketing tanpa komitmen besar. Namun, jika kamu serius ingin mendapatkan pekerjaan remote dan siap berinvestasi lebih untuk masa depan karirmu, maka Full Complete Package adalah pilihan yang tepat.",
   },
   {
-    question: "Can I access the course on mobile?",
+    question: "Apakah ada persyaratan tertentu untuk mengikuti kursus ini?",
     answer:
-      "Yes, the course is fully optimized for mobile devices. Learn anywhere, anytime.",
+      "Tidak ada persyaratan khusus untuk mengikuti kursus ini. Bahkan jika kamu tidak memiliki pengalaman atau gelar diploma/sarjana, kamu tetap bisa bekerja remote di bidang digital marketing setelah menyelesaikan kursus ini. Kami menyediakan materi yang mudah dipahami dan praktis untuk membantu kamu memulai karir di bidang ini.",
   },
   {
-    question: "Do I get a certificate?",
+    question: "Kursus online nya akan disampaikan dalam bahasa apa?",
     answer:
-      "Premium members receive a certificate of completion that can be shared on LinkedIn and other platforms.",
+      "Kursus ini akan disampaikan dalam bahasa Indonesia dan bahasa Inggris, sehingga kamu dapat belajar dengan lebih nyaman dan mudah. Jangan khawatir, bahasa Inggris yang digunakan sangat mudah diikuti, jadi kamu tidak perlu takut untuk ikut kursus ini.",
   },
   {
-    question: "Is payment secure?",
+    question: "Apakah dana yang sudah di transfer dapat di refund?",
     answer:
-      "Yes, all payments are processed through Duitku, a trusted Indonesian payment gateway with bank-level security and encryption.",
+      "Kami tidak menyediakan refund untuk kursus ini. Namun, jika ada masalah dengan materi atau pengiriman kursus, kami dengan senang hati akan membantu untuk menyelesaikannya sebaik mungkin. Pastikan kamu memilih paket kursus dan membaca informasi dengan detail dan benar sebelum melakukan pembayaran.",
+  },
+  {
+    question:
+      "Berapa penghasilan yang bisa aku dapatkan dengan kerja remote di bidang digital marketing?",
+    answer:
+      "Penghasilan kerja remote di bidang digital marketing dapat sangat bervariasi. Sebagai pemula, kamu bisa mendapatkan sekitar Rp 5 juta hingga Rp 10 juta per bulan. Namun, jika kamu sudah berpengalaman atau bekerja dengan klien internasional, penghasilanmu bisa lebih dari itu, kamu dapat mencapai puluhan juta rupiah per bulan.",
   },
 ];
