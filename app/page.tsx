@@ -387,6 +387,13 @@ export default function HomePage() {
           <p className="text-lg font-semibold text-gray-800 mb-6">
             Contact Support: +62 878 6334 2502
           </p>
+          <p className="text-lg font-semibold text-gray-800 mb-6">
+            Email: penirizki5@gmail.com
+          </p>
+          <p className="text-lg font-semibold text-gray-800 mb-6">
+            Alamat: Jl. Gunung Soputan, Kelurahan Pemecutan Kelod, Kecamatan
+            Denpasar Barat, Kota Denpasar.
+          </p>
           <Link
             href="https://wa.me/6287863342502"
             target="_blank"
@@ -396,33 +403,6 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <BookOpen className="h-8 w-8 text-pink-400" />
-            <span className="text-xl font-bold">Learn with Peni</span>
-          </div>
-          <p className="text-gray-400 mb-4">
-            Empowering remote workers worldwide
-          </p>
-          <div className="flex justify-center space-x-6">
-            <a href="#" className="text-gray-400 hover:text-white">
-              Privacy Policy
-            </a>
-            <a href="#" className="text-gray-400 hover:text-white">
-              Terms of Service
-            </a>
-            <a href="#" className="text-gray-400 hover:text-white">
-              Contact
-            </a>
-          </div>
-          <p className="text-gray-400 mt-8">
-            © 2024 Learn with Peni. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }
