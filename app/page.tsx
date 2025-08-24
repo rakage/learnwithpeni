@@ -1,8 +1,44 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle, Star, Users, Clock, BookOpen, Award } from "lucide-react";
+import { CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function HomePage() {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    // Set the target date - 24 hours from now
+    const targetDate = new Date();
+    targetDate.setHours(targetDate.getHours() + 24);
+
+    const updateCountdown = () => {
+      const now = new Date().getTime();
+      const distance = targetDate.getTime() - now;
+
+      if (distance < 0) {
+        setTimeLeft("Offer Expired");
+        return;
+      }
+
+      const hours = Math.floor(distance / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+    };
+
+    // Update immediately
+    updateCountdown();
+
+    // Update every second
+    const interval = setInterval(updateCountdown, 1000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section - Updated to match the image */}
@@ -325,7 +361,7 @@ export default function HomePage() {
                     id="countdown"
                     className="text-lg font-bold text-pink-700"
                   >
-                    24h 0m 0s
+                    {timeLeft || "Loading..."}
                   </div>
                 </div>
               </div>
