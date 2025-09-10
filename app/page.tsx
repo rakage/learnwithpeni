@@ -350,7 +350,7 @@ export default function HomePage() {
 
               <div className="text-center">
                 <Link
-                  href="/payment?courseId=cmdy0xvzm0001mrw5oga3jd6f"
+                  href="https://clicky.id/penirizkiy/get-remote-job-full-package"
                   className="bg-pink-700 text-white py-4 px-8 rounded-lg text-xl font-bold hover:bg-pink-800 transition-colors duration-300 inline-block"
                 >
                   Belajar Sekarang

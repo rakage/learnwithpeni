@@ -64,9 +64,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const taxAmount = Math.round(course.price * 0.01);
-    const rakaServiceFee = Math.round(course.price * 0.05);
-    const paymentAmount = Math.round(course.price + taxAmount + rakaServiceFee);
+    const paymentAmount = Math.round(course.price);
 
     // Prepare customer information
     const firstName =

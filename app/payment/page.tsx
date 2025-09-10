@@ -75,14 +75,10 @@ export default function PaymentPage() {
 
   // Calculate fees
   const calculateFees = (basePrice: number) => {
-    const taxAmount = Math.round(basePrice * 0.01);
-    const serviceFee = Math.round(basePrice * 0.05);
-    const totalAmount = Math.round(basePrice + taxAmount + serviceFee);
+    const totalAmount = Math.round(basePrice);
 
     return {
       basePrice,
-      taxAmount,
-      serviceFee,
       totalAmount,
     };
   };
@@ -422,53 +418,18 @@ export default function PaymentPage() {
                   </div>
 
                   {/* Price Breakdown */}
-                  <div className="border-t pt-4 space-y-3">
+                  <div className="border-t pt-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Course Price:</span>
-                      <span className="font-medium">
+                      <span className="font-semibold text-gray-900">
+                        Course Price:
+                      </span>
+                      <span className="text-2xl font-bold text-blue-600">
                         {new Intl.NumberFormat("id-ID", {
                           style: "currency",
                           currency: "IDR",
                           minimumFractionDigits: 0,
-                        }).format(fees.basePrice)}
+                        }).format(fees.totalAmount)}
                       </span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Tax (1%):</span>
-                      <span className="font-medium">
-                        {new Intl.NumberFormat("id-ID", {
-                          style: "currency",
-                          currency: "IDR",
-                          minimumFractionDigits: 0,
-                        }).format(fees.taxAmount)}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Service Fee (5%):</span>
-                      <span className="font-medium">
-                        {new Intl.NumberFormat("id-ID", {
-                          style: "currency",
-                          currency: "IDR",
-                          minimumFractionDigits: 0,
-                        }).format(fees.serviceFee)}
-                      </span>
-                    </div>
-
-                    <div className="border-t pt-3">
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-900">
-                          Total Amount:
-                        </span>
-                        <span className="text-2xl font-bold text-blue-600">
-                          {new Intl.NumberFormat("id-ID", {
-                            style: "currency",
-                            currency: "IDR",
-                            minimumFractionDigits: 0,
-                          }).format(fees.totalAmount)}
-                        </span>
-                      </div>
                     </div>
                   </div>
 
