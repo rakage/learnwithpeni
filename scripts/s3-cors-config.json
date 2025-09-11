@@ -1,0 +1,35 @@
+{
+  "CORSRules": [
+    {
+      "ID": "AllowVideoStreaming",
+      "AllowedHeaders": ["*"],
+      "AllowedMethods": ["GET", "HEAD"],
+      "AllowedOrigins": [
+        "http://localhost:3000",
+        "https://localhost:3000",
+        "https://*.vercel.app",
+        "https://*.netlify.app",
+        "*"
+      ],
+      "ExposeHeaders": [
+        "Content-Range",
+        "Content-Length",
+        "Accept-Ranges",
+        "Content-Type"
+      ],
+      "MaxAgeSeconds": 3600
+    },
+    {
+      "ID": "AllowVideoRangeRequests",
+      "AllowedHeaders": ["Range", "If-Range"],
+      "AllowedMethods": ["GET", "HEAD"],
+      "AllowedOrigins": ["*"],
+      "ExposeHeaders": [
+        "Content-Range",
+        "Accept-Ranges",
+        "Content-Length"
+      ],
+      "MaxAgeSeconds": 86400
+    }
+  ]
+}

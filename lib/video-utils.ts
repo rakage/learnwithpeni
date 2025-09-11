@@ -1,31 +1,37 @@
 // Utility functions for video URL protection
 
 /**
- * Convert S3 video URL to proxied URL to hide actual S3 location
- * @param s3Url - The original S3 URL
- * @returns Proxied URL that goes through our API
+ * Get direct video URL for streaming (bypassing proxy for better performance)
+ * @param videoUrl - The original video URL
+ * @returns Direct S3 URL for video streaming
  */
-export function getProxiedVideoUrl(s3Url: string): string {
+export function getDirectVideoUrl(s3Url: string): string {
   if (!s3Url) return "";
 
   try {
-    // Check if it's an S3 URL pattern
+    // Check if it's already a proper S3 URL
     const s3Pattern = /https:\/\/([^.]+)\.s3\.([^.]+)\.amazonaws\.com\/(.+)/;
     const match = s3Url.match(s3Pattern);
 
     if (match) {
-      const [, bucket, region, filePath] = match;
-
-      // Return proxied URL that hides the actual S3 location
-      return `/api/video-proxy/${filePath}`;
+      // Return the direct S3 URL for better performance and reliability
+      return s3Url;
     }
 
     // If not an S3 URL we recognize, return original (might be YouTube, etc.)
     return s3Url;
   } catch (error) {
-    console.error("Error converting video URL:", error);
+    console.error("Error processing video URL:", error);
     return s3Url; // Fallback to original URL
   }
+}
+
+/**
+ * Legacy function for backwards compatibility - now returns direct URLs
+ * @deprecated Use getDirectVideoUrl instead
+ */
+export function getProxiedVideoUrl(s3Url: string): string {
+  return getDirectVideoUrl(s3Url);
 }
 
 /**

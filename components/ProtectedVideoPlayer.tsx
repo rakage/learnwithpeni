@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import ReactPlayer from "react-player";
-import { getProxiedVideoUrl } from "@/lib/video-utils";
-import { AuthClient, smartGet } from "@/lib/auth-client";
+import { getDirectVideoUrl } from "@/lib/video-utils";
 
 interface ProtectedVideoPlayerProps {
   videoUrl: string;
@@ -18,45 +17,27 @@ export default function ProtectedVideoPlayer({
   width = "100%",
   height = "100%",
 }: ProtectedVideoPlayerProps) {
-  const [authenticatedUrl, setAuthenticatedUrl] = useState<string>("");
+  const [directVideoUrl, setDirectVideoUrl] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    const setupAuthenticatedVideo = async () => {
+    const setupDirectVideo = async () => {
       try {
         setLoading(true);
         setError("");
 
-        // First check if user is authenticated (similar to admin courses page)
-        const isAuth = await AuthClient.isAuthenticated();
-        if (!isAuth) {
-          throw new Error("Please log in to view videos");
+        if (!videoUrl) {
+          throw new Error("No video URL provided");
         }
 
-        // Get the proxied URL without token (rely on smart authentication)
-        const proxiedUrl = getProxiedVideoUrl(videoUrl);
-
-        const testResponse = await AuthClient.smartFetch(proxiedUrl, {
-          method: "HEAD", // Use HEAD to test accessibility without downloading
-        });
-
-        if (!testResponse.ok) {
-          throw new Error(
-            `Video not accessible: ${testResponse.status} ${testResponse.statusText}`
-          );
-        }
-
-        // Create an authenticated URL with session info
-        // Add the access token as a URL parameter for ReactPlayer requests
-        const token = AuthClient.getToken();
-        const authenticatedVideoUrl = token
-          ? `${proxiedUrl}?access_token=${encodeURIComponent(
-              token
-            )}&t=${Date.now()}`
-          : `${proxiedUrl}?t=${Date.now()}`;
-
-        setAuthenticatedUrl(authenticatedVideoUrl);
+        // Get direct S3 URL for better performance and reliability
+        const directUrl = getDirectVideoUrl(videoUrl);
+        
+        // Add cache-busting parameter to avoid stale content
+        const finalUrl = `${directUrl}${directUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        
+        setDirectVideoUrl(finalUrl);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load video");
       } finally {
@@ -65,7 +46,7 @@ export default function ProtectedVideoPlayer({
     };
 
     if (videoUrl) {
-      setupAuthenticatedVideo();
+      setupDirectVideo();
     }
   }, [videoUrl]);
 
@@ -119,7 +100,7 @@ export default function ProtectedVideoPlayer({
         </div>
 
         <ReactPlayer
-          url={authenticatedUrl}
+          url={directVideoUrl}
           width="100%"
           height="100%"
           style={{ position: "absolute", top: 0, left: 0 }}
@@ -128,10 +109,10 @@ export default function ProtectedVideoPlayer({
           config={{
             file: {
               attributes: {
-                controlsList: "nodownload nofullscreen noremoteplayback",
+                controlsList: "nodownload nofullscreen noremoteplaybook",
                 disablePictureInPicture: true,
                 onContextMenu: (e: Event) => e.preventDefault(),
-                crossOrigin: "use-credentials", // Important for cookie-based auth
+                crossOrigin: "anonymous", // Allow anonymous access for public S3 videos
               },
               forceHLS: false,
               forceVideo: true,
@@ -151,18 +132,15 @@ export default function ProtectedVideoPlayer({
             videoElements.forEach((video) => {
               video.setAttribute(
                 "controlsList",
-                "nodownload nofullscreen noremoteplayback"
+                "nodownload nofullscreen noremoteplaybook"
               );
               video.setAttribute("disablePictureInPicture", "true");
               video.addEventListener("contextmenu", (e) => e.preventDefault());
-
-              // Set credentials for all video requests
-              video.crossOrigin = "use-credentials";
             });
           }}
           onError={(error) => {
             console.error("❌ Video player error:", error);
-            setError("Failed to load video. Please refresh and try again.");
+            setError("Failed to load video from S3. Please check your connection and try again.");
           }}
         />
 
