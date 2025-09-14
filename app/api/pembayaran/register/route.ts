@@ -175,14 +175,14 @@ export async function POST(request: NextRequest) {
       await prisma.$transaction(async (tx) => {
         // Check if user already exists in database
         let dbUser = await tx.user.findUnique({
-          where: { id: authData.user.id },
+          where: { id: authData.user!.id },
         });
 
         if (!dbUser) {
           // Create user in our database
           dbUser = await tx.user.create({
             data: {
-              id: authData.user.id,
+              id: authData.user!.id,
               email: email.toLowerCase(),
               name: `${firstName} ${lastName}`.trim(),
               role: "STUDENT",
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
           // Update name if different
           if (dbUser.name !== `${firstName} ${lastName}`.trim()) {
             dbUser = await tx.user.update({
-              where: { id: authData.user.id },
+              where: { id: authData.user!.id },
               data: { name: `${firstName} ${lastName}`.trim() },
             });
             console.log("✅ User name updated in database");
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
         // Create proper Payment record from PendingPayment
         await tx.payment.create({
           data: {
-            userId: authData.user.id,
+            userId: authData.user!.id,
             courseId: pendingPayment.courseId,
             stripePaymentId: pendingPayment.stripePaymentId,
             amount: pendingPayment.amount,
@@ -218,7 +218,7 @@ export async function POST(request: NextRequest) {
         // Create enrollment
         await tx.enrollment.create({
           data: {
-            userId: authData.user.id,
+            userId: authData.user!.id,
             courseId: courseId,
           },
         });
@@ -236,10 +236,10 @@ export async function POST(request: NextRequest) {
       console.log("🎉 PAYMENT FIRST REGISTRATION COMPLETED:");
       console.log(`   - User: ${email}`);
       console.log(`   - Course: ${pendingPayment.course.title}`);
-      console.log(`   - User ID: ${authData.user.id}`);
+      console.log(`   - User ID: ${authData.user!.id}`);
 
       // Generate invoice number
-      const invoiceNumber = `INV-${Date.now()}-${authData.user.id.slice(0, 8).toUpperCase()}`;
+      const invoiceNumber = `INV-${Date.now()}-${authData.user!.id.slice(0, 8).toUpperCase()}`;
       
       // Email was already sent after payment confirmation
       // No need to send another email after registration completion
@@ -249,7 +249,7 @@ export async function POST(request: NextRequest) {
         success: true,
         message: "Registration completed successfully",
         user: {
-          id: authData.user.id,
+          id: authData.user!.id,
           email: email,
           name: `${firstName} ${lastName}`.trim(),
           role: "STUDENT",
@@ -264,7 +264,7 @@ export async function POST(request: NextRequest) {
       if (dbError.code !== "P2002") {
         // Clean up Supabase user if database creation failed for other reasons
         try {
-          await supabase.auth.admin.deleteUser(authData.user.id);
+          await supabase.auth.admin.deleteUser(authData.user!.id);
           console.log("🧧 Cleaned up Supabase user after database error");
         } catch (cleanupError) {
           console.error("❌ Failed to cleanup Supabase user:", cleanupError);

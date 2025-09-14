@@ -121,7 +121,7 @@ export default function PaymentFirstSuccessPage() {
       if (userCheck.ok) {
         const userData = await userCheck.json();
         if (userData.userExists) {
-          toast.info("You already have an account. Redirecting to sign in...");
+          toast.success("You already have an account. Redirecting to sign in...");
           router.push(`/auth/signin?email=${encodeURIComponent(paymentData.customerEmail)}`);
           return;
         }
