@@ -228,15 +228,9 @@ export default function Navigation({ showUserMenu = true }: NavigationProps) {
               <>
                 <Link
                   href="/auth/signin"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/auth/signup"
                   className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
                 >
-                  Get Started
+                  Sign In
                 </Link>
               </>
             )}

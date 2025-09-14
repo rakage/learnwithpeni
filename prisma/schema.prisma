@@ -41,9 +41,10 @@ model Course {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  modules     Module[]
-  enrollments Enrollment[]
-  payments    Payment[]
+  modules        Module[]
+  enrollments    Enrollment[]
+  payments       Payment[]
+  pendingPayments PendingPayment[]
 
   @@map("courses")
 }
@@ -116,6 +117,26 @@ model Payment {
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@map("payments")
+}
+
+model PendingPayment {
+  id              String        @id @default(cuid())
+  customerEmail   String
+  customerName    String
+  customerPhone   String?
+  courseId        String
+  stripePaymentId String        @unique
+  merchantOrderId String?       @unique // Duitku merchant order ID for lookup
+  amount          Float
+  currency        String        @default("idr")
+  status          PaymentStatus @default(PENDING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("pending_payments")
 }
 
 enum Role {

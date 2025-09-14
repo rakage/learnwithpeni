@@ -72,30 +72,37 @@ if (!bucketName || !accessKeyId || !secretAccessKey) {
   process.exit(1);
 }
 
-// CORS configuration for video streaming
+// CORS configuration for video streaming and file uploads
 const corsConfiguration = {
   CORSRules: [
     {
-      ID: "AllowVideoStreaming",
+      ID: "AllowVideoStreamingAndUploads",
       AllowedHeaders: [
         "*"
       ],
       AllowedMethods: [
         "GET",
-        "HEAD"
+        "HEAD",
+        "PUT",
+        "POST"
       ],
       AllowedOrigins: [
         "http://localhost:3000",
         "https://localhost:3000",
         "https://*.vercel.app",
         "https://*.netlify.app",
-        "*" // Allow all origins for public video streaming
+        "https://learnwithpeni.com",
+        "*" // Allow all origins for flexibility
       ],
       ExposeHeaders: [
         "Content-Range",
         "Content-Length",
         "Accept-Ranges",
-        "Content-Type"
+        "Content-Type",
+        "ETag",
+        "x-amz-server-side-encryption",
+        "x-amz-request-id",
+        "x-amz-id-2"
       ],
       MaxAgeSeconds: 3600
     },
@@ -103,17 +110,27 @@ const corsConfiguration = {
       ID: "AllowVideoRangeRequests",
       AllowedHeaders: [
         "Range",
-        "If-Range"
+        "If-Range",
+        "Authorization",
+        "Content-Type",
+        "Content-Length",
+        "Content-MD5",
+        "x-amz-content-sha256",
+        "x-amz-date",
+        "x-amz-security-token"
       ],
       AllowedMethods: [
         "GET",
-        "HEAD"
+        "HEAD",
+        "PUT",
+        "POST"
       ],
       AllowedOrigins: ["*"],
       ExposeHeaders: [
         "Content-Range",
         "Accept-Ranges",
-        "Content-Length"
+        "Content-Length",
+        "ETag"
       ],
       MaxAgeSeconds: 86400
     }

@@ -6,6 +6,7 @@ export const DUITKU_CONFIG = {
   API_KEY: process.env.DUITKU_API_KEY || "d2547323e018a40ddfd10d81923823ca",
   SANDBOX_URL: "https://sandbox.duitku.com/webapi/api/merchant",
   PRODUCTION_URL: "https://passport.duitku.com/webapi/api/merchant",
+  BASE_URL: process.env.BASE_URL,
   // Use a specific environment variable for Duitku production mode
   // This allows you to use sandbox even when deployed to production
   IS_PRODUCTION: process.env.DUITKU_ENVIRONMENT === "production",
@@ -443,16 +444,39 @@ export class DuitkuHelper {
 
   // Get callback URL
   static getCallbackUrl(): string {
-    const baseUrl = "https://learnwithpeni.com";
+    const baseUrl = DUITKU_CONFIG.BASE_URL;
     return `${baseUrl}/api/webhook/duitku`;
   }
 
   // Get return URL
   static getReturnUrl(courseId?: string): string {
-    const baseUrl = "https://learnwithpeni.com";
+    const baseUrl = DUITKU_CONFIG.BASE_URL;
     return courseId
       ? `${baseUrl}/payment/success?courseId=${courseId}`
       : `${baseUrl}/payment/success`;
+  }
+
+  // Get callback URL for pembayaran flow
+  static getPaymentFirstCallbackUrl(): string {
+    const baseUrl = DUITKU_CONFIG.BASE_URL;
+    // Ensure no double slashes
+    const cleanUrl = baseUrl?.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    return `${cleanUrl}/api/webhook/duitku-pembayaran`;
+  }
+
+  // Get return URL for pembayaran flow - now includes payment reference
+  static getPaymentFirstReturnUrl(courseId: string, paymentReference?: string): string {
+    const baseUrl = DUITKU_CONFIG.BASE_URL;
+    // Ensure no double slashes
+    const cleanUrl = baseUrl?.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    
+    // If we have the payment reference, include it in the URL
+    if (paymentReference) {
+      return `${cleanUrl}/pembayaran/success?ref=${paymentReference}&courseId=${courseId}`;
+    }
+    
+    // Fallback to just courseId (Duitku will need to add the reference via callback)
+    return `${cleanUrl}/pembayaran/success?courseId=${courseId}`;
   }
 }
 

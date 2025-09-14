@@ -80,7 +80,7 @@ export default function AuthGuard({
     return null;
   }
 
-  // For non-auth pages (signin/signup), only show if user is not logged in
+  // For non-auth pages (signin), only show if user is not logged in
   if (!requireAuth && user) {
     return null;
   }
