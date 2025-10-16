@@ -44,6 +44,7 @@ export default function PaymentFirstSuccessPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isRedirectingToSignIn, setIsRedirectingToSignIn] = useState(false);
   const [pendingRegistration, setPendingRegistration] =
     useState<PendingRegistration | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
@@ -65,6 +66,8 @@ export default function PaymentFirstSuccessPage() {
           
           // Check if user already registered
           if (paymentCheck.alreadyRegistered) {
+            setIsRedirectingToSignIn(true);
+            setIsLoading(false);
             toast.success("You already have an account! Redirecting to sign in...");
             setTimeout(() => {
               router.push(`/auth/signin?email=${encodeURIComponent(paymentCheck.userEmail)}`);
@@ -108,6 +111,8 @@ export default function PaymentFirstSuccessPage() {
           
           // Check if user already registered
           if (paymentCheck.alreadyRegistered) {
+            setIsRedirectingToSignIn(true);
+            setIsLoading(false);
             toast.success("You already have an account! Redirecting to sign in...");
             setTimeout(() => {
               router.push(`/auth/signin?email=${encodeURIComponent(paymentCheck.userEmail)}`);
@@ -271,6 +276,30 @@ export default function PaymentFirstSuccessPage() {
             <div className="text-center">
               <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
               <p>Verifying payment...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isRedirectingToSignIn) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-96">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <h2 className="text-xl font-semibold mb-2">
+                Account Found!
+              </h2>
+              <p className="text-gray-600 mb-4">
+                You already have an account. Redirecting you to sign in...
+              </p>
+              <Loader2 className="w-6 h-6 animate-spin mx-auto text-blue-600" />
             </div>
           </div>
         </div>
