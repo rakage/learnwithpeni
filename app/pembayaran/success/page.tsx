@@ -62,6 +62,16 @@ export default function PaymentFirstSuccessPage() {
         if (paymentReference) {
           // Verify payment using the reference from URL
           const paymentCheck = await verifyPayment(paymentReference);
+          
+          // Check if user already registered
+          if (paymentCheck.alreadyRegistered) {
+            toast.success("You already have an account! Redirecting to sign in...");
+            setTimeout(() => {
+              router.push(`/auth/signin?email=${encodeURIComponent(paymentCheck.userEmail)}`);
+            }, 1500);
+            return;
+          }
+          
           if (paymentCheck.success) {
             await processPaymentData(paymentCheck.payment);
             return;
@@ -95,6 +105,16 @@ export default function PaymentFirstSuccessPage() {
         
         if (pendingData?.pendingPayment) {
           const paymentCheck = await verifyPayment(pendingData.pendingPayment.stripePaymentId);
+          
+          // Check if user already registered
+          if (paymentCheck.alreadyRegistered) {
+            toast.success("You already have an account! Redirecting to sign in...");
+            setTimeout(() => {
+              router.push(`/auth/signin?email=${encodeURIComponent(paymentCheck.userEmail)}`);
+            }, 1500);
+            return;
+          }
+          
           if (paymentCheck.success) {
             await processPaymentData(paymentCheck.payment);
             return;
