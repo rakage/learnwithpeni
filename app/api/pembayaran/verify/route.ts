@@ -32,6 +32,34 @@ export async function POST(request: NextRequest) {
 
     if (!pendingPayment) {
       console.log("❌ Pending payment not found:", paymentReference);
+      
+      // Check if this payment was already processed (user already registered)
+      // Look for completed payment in Payment table
+      const completedPayment = await prisma.payment.findFirst({
+        where: { 
+          stripePaymentId: paymentReference,
+          status: "COMPLETED"
+        },
+        include: {
+          user: true,
+          course: true
+        }
+      });
+
+      if (completedPayment) {
+        console.log("✅ Payment already processed, user already registered");
+        return NextResponse.json(
+          { 
+            success: false, 
+            alreadyRegistered: true,
+            userEmail: completedPayment.user.email,
+            courseName: completedPayment.course.title,
+            error: "You have already completed registration for this payment. Please sign in to access your course." 
+          },
+          { status: 200 }
+        );
+      }
+
       return NextResponse.json(
         { success: false, error: "Payment not found" },
         { status: 404 }
