@@ -136,7 +136,7 @@ export class EmailService {
         color: #fff6fb;
       "
     >
-      You're enrolled! Payment confirmed. Tap to start learning.
+      Selamat datang! Pembayaran terkonfirmasi. Mulai belajar sekarang.
     </div>
 
     <!-- Main Container -->
@@ -244,7 +244,7 @@ export class EmailService {
                   class="mobile-text-center"
                   aria-label="Enrollment confirmed sticker"
                 >
-                  You're in! ✨
+                  Kamu Berhasil! ✨
                 </div>
               </td>
             </tr>
@@ -267,16 +267,17 @@ export class EmailService {
                       <h1
                         style="
                           margin: 0 0 8px 0;
-                          font-size: 32px;
+                          font-size: 28px;
                           font-weight: 700;
                           color: #8a2be2;
                           text-align: center;
                           font-family: 'Poppins', Arial, sans-serif;
                           position: relative;
                           display: inline-block;
+                          line-height: 1.4;
                         "
                       >
-                        Welcome to ${emailData.courseName}!
+                        ✨ Selamat Datang di Learn With Peni! 💖
                         <!-- Hand-drawn underline SVG -->
                         <svg
                           width="100%"
@@ -306,8 +307,23 @@ export class EmailService {
                           line-height: 1.4;
                         "
                       >
-                        Hi ${emailData.customerName}, thanks for joining Learn With Peni — your
-                        journey starts now ✨
+                        Perjalanan Belajar Remote Work kamu Dimulai Sekarang
+                      </p>
+                      
+                      <!-- Welcome Message -->
+                      <p
+                        style="
+                          margin: 16px 0 0 0;
+                          font-size: 16px;
+                          color: #3a2e3f;
+                          text-align: center;
+                          font-family: 'Poppins', Arial, sans-serif;
+                          line-height: 1.6;
+                        "
+                      >
+                        Hai <strong>${emailData.customerName}</strong>,<br/><br/>
+                        Yeay! Kamu udah resmi jadi bagian dari Learn With Peni! <strong>✨</strong><br/>
+                        Nggak ada perjalanan yang instan, tapi aku percaya kamu bisa berkembang dengan cara dan ritmemu sendiri 💡
                       </p>
                     </td>
                   </tr>
@@ -346,7 +362,7 @@ export class EmailService {
                           font-family: 'Poppins', Arial, sans-serif;
                         "
                       >
-                        Payment Details
+                        📘 Detail Pembelian
                       </h2>
 
                       <!-- Payment Details Table -->
@@ -379,12 +395,12 @@ export class EmailService {
                                     font-weight: 600;
                                     color: #3a2e3f;
                                     font-size: 14px;
-                                    width: 25%;
+                                    width: 30%;
                                     padding-right: 12px;
                                   "
                                   class="dark-mode-text"
                                 >
-                                  Course:
+                                  Kelas:
                                 </td>
                                 <td
                                   style="color: #6d5e73; font-size: 14px"
@@ -417,12 +433,12 @@ export class EmailService {
                                     font-weight: 600;
                                     color: #3a2e3f;
                                     font-size: 14px;
-                                    width: 25%;
+                                    width: 30%;
                                     padding-right: 12px;
                                   "
                                   class="dark-mode-text"
                                 >
-                                  Amount:
+                                  Jumlah:
                                 </td>
                                 <td
                                   style="
@@ -459,12 +475,12 @@ export class EmailService {
                                     font-weight: 600;
                                     color: #3a2e3f;
                                     font-size: 14px;
-                                    width: 25%;
+                                    width: 30%;
                                     padding-right: 12px;
                                   "
                                   class="dark-mode-text"
                                 >
-                                  Reference:
+                                  Kode Referensi:
                                 </td>
                                 <td
                                   style="
@@ -495,12 +511,12 @@ export class EmailService {
                                     font-weight: 600;
                                     color: #3a2e3f;
                                     font-size: 14px;
-                                    width: 25%;
+                                    width: 30%;
                                     padding-right: 12px;
                                   "
                                   class="dark-mode-text"
                                 >
-                                  Date:
+                                  Tanggal Pembayaran:
                                 </td>
                                 <td
                                   style="color: #6d5e73; font-size: 14px"
@@ -549,6 +565,18 @@ export class EmailService {
                   </v:roundrect>
                 <![endif]-->
                 <!--[if !mso]><!-->
+                <p
+                  style="
+                    margin: 0 0 12px 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #3a2e3f;
+                    text-align: center;
+                    font-family: 'Poppins', Arial, sans-serif;
+                  "
+                >
+                  🚀 Akses Kelasmu di Sini:
+                </p>
                 <a
                   href="${emailData.dashboardUrl}"
                   style="
@@ -571,32 +599,94 @@ export class EmailService {
                   onmouseout="this.style.backgroundColor='#8A2BE2'"
                   onfocus="this.style.outline='2px dotted #FFC7E6';"
                 >
-                  Access Your Course ➡️
+                  👉 Mulai Belajar Sekarang
                 </a>
                 <!--<![endif]-->
               </td>
             </tr>
 
+            <!-- Tutorial Section -->
+            <tr>
+              <td style="padding: 0 16px 24px 16px; background-color: #fff6fb">
+                <table
+                  role="presentation"
+                  cellspacing="0"
+                  cellpadding="0"
+                  border="0"
+                  width="100%"
+                >
+                  <tr>
+                    <td
+                      style="
+                        background-color: #ffffff;
+                        border-radius: 14px;
+                        border: 1px solid #f6d7f0;
+                        box-shadow: 0 2px 8px rgba(138, 43, 226, 0.08);
+                        padding: 24px 20px;
+                      "
+                    >
+                      <h2
+                        style="
+                          margin: 0 0 16px 0;
+                          font-size: 20px;
+                          font-weight: 600;
+                          color: #ff69b4;
+                          font-family: 'Poppins', Arial, sans-serif;
+                        "
+                      >
+                        Tutorial Akses Course 💡
+                      </h2>
+                      <ol
+                        style="
+                          margin: 0;
+                          padding-left: 20px;
+                          color: #3a2e3f;
+                          font-size: 14px;
+                          line-height: 1.8;
+                          font-family: 'Poppins', Arial, sans-serif;
+                        "
+                      >
+                        <li style="margin-bottom: 8px;">Klik tombol <strong>Mulai Belajar Sekarang</strong> pada email ini.</li>
+                        <li style="margin-bottom: 8px;">Atur password baru dan konfirmasi password yang kamu buat.</li>
+                        <li style="margin-bottom: 8px;">Klik <strong>Complete Registration & Access Course</strong>.</li>
+                        <li style="margin-bottom: 8px;">Selanjutnya, silakan <strong>Sign In</strong> menggunakan email yang kamu daftarkan dan password yang sudah dibuat.</li>
+                        <li style="margin-bottom: 8px;">Setelah berhasil login, kamu akan masuk ke <strong>Dashboard Course</strong>.</li>
+                        <li style="margin-bottom: 8px;">Yeay! Kamu sudah bisa akses materi dan mulai belajar 🚀</li>
+                        <li>Untuk login kembali, silahkan bisa melalui link <a href="https://learnwithpeni.com/auth/signin" style="color: #8a2be2; text-decoration: underline;">https://learnwithpeni.com/auth/signin</a></li>
+                      </ol>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            
             <!-- Pro Tip -->
             <tr>
               <td
                 style="padding: 0 16px 32px 16px; background-color: #fff6fb"
                 align="center"
               >
-                <p
+                <div
                   style="
-                    margin: 0;
-                    font-size: 14px;
-                    color: #6d5e73;
+                    background-color: #fef3c7;
+                    border-left: 4px solid #f59e0b;
+                    border-radius: 8px;
+                    padding: 16px;
                     text-align: center;
-                    font-family: 'Poppins', Arial, sans-serif;
-                    font-style: italic;
                   "
-                  class="dark-mode-muted"
                 >
-                  💡 Pro tip: Bookmark the course page so you can jump back in
-                  anytime 💗
-                </p>
+                  <p
+                    style="
+                      margin: 0;
+                      font-size: 14px;
+                      color: #3a2e3f;
+                      font-family: 'Poppins', Arial, sans-serif;
+                      line-height: 1.5;
+                    "
+                  >
+                    💡 <strong>Tips:</strong> Simpan link kelasnya ya, biar kamu bisa gunakan kapanpun saat mau belajar lagi 💛
+                  </p>
+                </div>
               </td>
             </tr>
 
@@ -627,36 +717,20 @@ export class EmailService {
                 >
                   <tr>
                     <td align="center">
-                      <h3
-                        style="
-                          margin: 0 0 12px 0;
-                          font-size: 18px;
-                          font-weight: 600;
-                          color: #8a2be2;
-                          text-align: center;
-                          font-family: 'Poppins', Arial, sans-serif;
-                        "
-                      >
-                        Need help?
-                      </h3>
                       <p
                         style="
                           margin: 0 0 16px 0;
                           font-size: 14px;
-                          color: #6d5e73;
+                          color: #3a2e3f;
                           text-align: center;
                           font-family: 'Poppins', Arial, sans-serif;
-                          line-height: 1.5;
+                          line-height: 1.6;
                         "
-                        class="dark-mode-muted"
                       >
-                        Questions about your enrollment or access? Just contact
-                        us at
-                        <a
-                          href="https://wa.me/6287863342502"
-                          style="color: #ff69b4; text-decoration: underline"
-                          >+6287863342502</a
-                        >.
+                        Kalau ada pertanyaan tentang akses atau pendaftaran course, kamu bisa langsung hubungi kami di:<br/><br/>
+                        📩 <a href="mailto:penirizki5@gmail.com" style="color: #8a2be2; text-decoration: underline;">penirizki5@gmail.com</a><br/>
+                        atau<br/>
+                        📱 <a href="https://wa.me/6287863342502" style="color: #8a2be2; text-decoration: underline;">+62 878-6334-2502</a>
                       </p>
                       <table
                         role="presentation"
@@ -799,7 +873,7 @@ export class EmailService {
       await resend.emails.send({
         from: 'LearnWithPeni <noreply@verify.learnwithpeni.com>',
         to: [emailData.customerEmail],
-        subject: `🎉 Welcome to ${emailData.courseName} - Your Course is Ready!`,
+        subject: `✨ Selamat Datang di Learn With Peni! Perjalanan Belajar Remote Work kamu Dimulai Sekarang 💖`,
         html: htmlContent,
       });
 
