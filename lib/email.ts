@@ -296,24 +296,10 @@ export class EmailService {
                         </svg>
                       </h1>
 
-                      <!-- Subtitle -->
-                      <p
-                        style="
-                          margin: 24px 0 0 0;
-                          font-size: 18px;
-                          color: #6d5e73;
-                          text-align: center;
-                          font-family: 'Poppins', Arial, sans-serif;
-                          line-height: 1.4;
-                        "
-                      >
-                        Perjalanan Belajar Remote Work kamu Dimulai Sekarang
-                      </p>
-                      
                       <!-- Welcome Message -->
                       <p
                         style="
-                          margin: 16px 0 0 0;
+                          margin: 24px 0 0 0;
                           font-size: 16px;
                           color: #3a2e3f;
                           text-align: center;
@@ -324,6 +310,20 @@ export class EmailService {
                         Hai <strong>${emailData.customerName}</strong>,<br/><br/>
                         Yeay! Kamu udah resmi jadi bagian dari Learn With Peni! <strong>✨</strong><br/>
                         Nggak ada perjalanan yang instan, tapi aku percaya kamu bisa berkembang dengan cara dan ritmemu sendiri 💡
+                      </p>
+                      
+                      <!-- Subtitle -->
+                      <p
+                        style="
+                          margin: 16px 0 0 0;
+                          font-size: 14px;
+                          color: #6d5e73;
+                          text-align: center;
+                          font-family: 'Poppins', Arial, sans-serif;
+                          line-height: 1.4;
+                        "
+                      >
+                        Berikut detail pembelianmu:
                       </p>
                     </td>
                   </tr>
@@ -873,7 +873,7 @@ export class EmailService {
       await resend.emails.send({
         from: 'LearnWithPeni <noreply@verify.learnwithpeni.com>',
         to: [emailData.customerEmail],
-        subject: `✨ Selamat Datang di Learn With Peni! Perjalanan Belajar Remote Work kamu Dimulai Sekarang 💖`,
+        subject: '✨ Selamat Datang di Learn With Peni! Perjalanan Belajar Remote Work kamu Dimulai Sekarang 💖',
         html: htmlContent,
       });
 

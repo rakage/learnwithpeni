@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
               timeZone: 'Asia/Jakarta'
             }).format(new Date()),
             paymentMethod: DuitkuHelper.getPaymentMethodName(callbackData.paymentCode),
-            dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pembayaran/success?ref=${callbackData.reference}&courseId=${pendingPayment.courseId}`,
+            dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pembayaran/register?ref=${callbackData.reference}&courseId=${pendingPayment.courseId}`,
             invoiceNumber: `TEMP-${callbackData.reference.slice(-8)}`,
           };
           
