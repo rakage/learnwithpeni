@@ -338,137 +338,88 @@ export default function PaymentFirstSuccessPage() {
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Payment Successful!
+              Pembayaran kamu sudah berhasil! 🎉
             </h1>
-            <p className="text-gray-600">
-              Your payment has been processed. Complete your registration to
-              access the course.
-            </p>
           </div>
 
-          {/* Payment Summary */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-blue-600" />
-              Course Purchased
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-semibold text-lg">{course.title}</h3>
-                <p className="text-gray-600 text-sm">{course.description}</p>
-              </div>
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-900">Amount Paid:</span>
-                  <span className="text-xl font-bold text-green-600">
-                    {new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                      minimumFractionDigits: 0,
-                    }).format(course.price)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Registration Step */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-purple-600" />
-              Complete Your Registration
-            </h2>
-            <div className="space-y-4">
-              <p className="text-gray-600">
-                Your account will be created with the following information:
+          {/* Payment Reference */}
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-2">Nomor Referensi Pembayaran:</p>
+              <p className="text-2xl font-mono font-bold text-blue-600">
+                {pendingRegistration.paymentReference}
               </p>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-medium">Name:</span>{" "}
-                    {pendingRegistration.customerName.firstName}{" "}
-                    {pendingRegistration.customerName.lastName}
-                  </div>
-                  <div>
-                    <span className="font-medium">Email:</span>{" "}
-                    {pendingRegistration.customerEmail}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Password Setup */}
-              <div className="space-y-4">
-                <h3 className="font-medium text-gray-900">Set Your Password</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                      Password *
-                    </label>
-                    <input
-                      id="password"
-                      type="password"
-                      value={registrationForm.password}
-                      onChange={(e) => setRegistrationForm(prev => ({ ...prev, password: e.target.value }))}
-                      placeholder="Minimum 6 characters"
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                      Confirm Password *
-                    </label>
-                    <input
-                      id="confirmPassword"
-                      type="password"
-                      value={registrationForm.confirmPassword}
-                      onChange={(e) => setRegistrationForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      placeholder="Confirm password"
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-medium text-blue-900 mb-2">
-                  What happens next:
-                </h4>
-                <ol className="text-blue-800 text-sm space-y-1 list-decimal list-inside">
-                  <li>Set your password above</li>
-                  <li>Click "Complete Registration" below</li>
-                  <li>Your account will be created automatically</li>
-                  <li>You'll be signed in and redirected to your course</li>
-                  <li>Start learning immediately!</li>
-                </ol>
-              </div>
             </div>
           </div>
 
-          {/* Action Button */}
-          <button
-            onClick={handleCompleteRegistration}
-            disabled={isRegistering}
-            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-4 px-6 rounded-lg font-semibold flex items-center justify-center text-lg"
-          >
-            {isRegistering ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                Creating Your Account...
-              </>
-            ) : (
-              <>
-                Complete Registration & Access Course
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </>
-            )}
-          </button>
+          {/* Instructions */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div className="prose prose-sm max-w-none">
+              <p className="text-gray-700 mb-4">
+                Jika kamu sudah melakukan pembayaran, silakan <strong>cek email kamu</strong> (termasuk folder <em>Spam/Promotions</em>) untuk mendapatkan langkah selanjutnya dan link akses ke kelas.
+              </p>
 
-          <p className="text-center text-sm text-gray-600 mt-4">
-            By completing registration, you agree to our terms of service and
-            privacy policy.
-          </p>
+              <p className="text-gray-700 mb-3">
+                Jika kamu sudah bayar tapi belum menerima email dalam waktu 15 menit:
+              </p>
+
+              <ol className="list-decimal list-inside space-y-2 text-gray-700 mb-4">
+                <li><strong>Pastikan kamu menggunakan email yang sama saat checkout.</strong></li>
+                <li>Cek juga folder spam.</li>
+                <li>
+                  Jika tetap belum ada, kirimkan bukti pembayaran ke{" "}
+                  <a href="mailto:penirizki5@gmail.com" className="text-blue-600 hover:underline">
+                    penirizki5@gmail.com
+                  </a>{" "}
+                  atau WA:{" "}
+                  <a href="https://wa.me/6287863342502" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    +62 878-6334-2502
+                  </a>{" "}
+                  agar tim kami bisa bantu verifikasi manual.
+                </li>
+              </ol>
+
+              <p className="text-gray-700 mb-2">
+                Terima kasih sudah bergabung di <em>Learn With Peni</em>! 💛
+              </p>
+
+              <p className="text-gray-700">
+                Kami tidak sabar melihat kamu mulai belajar dan berkembang!
+              </p>
+            </div>
+          </div>
+
+          {/* Payment Details */}
+          <div className="bg-gray-50 rounded-lg p-6">
+            <h3 className="font-semibold text-gray-900 mb-3">Detail Pembayaran:</h3>
+            <div className="space-y-2 text-sm text-gray-700">
+              <div className="flex justify-between">
+                <span>Email:</span>
+                <span className="font-medium">{pendingRegistration.customerEmail}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Nama:</span>
+                <span className="font-medium">
+                  {pendingRegistration.customerName.firstName}{" "}
+                  {pendingRegistration.customerName.lastName}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Kursus:</span>
+                <span className="font-medium">{course.title}</span>
+              </div>
+              <div className="flex justify-between border-t pt-2 mt-2">
+                <span>Total Dibayar:</span>
+                <span className="font-bold text-green-600">
+                  {new Intl.NumberFormat("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                    minimumFractionDigits: 0,
+                  }).format(course.price)}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
