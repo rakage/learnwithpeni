@@ -179,25 +179,35 @@ export async function POST(request: NextRequest) {
         });
 
         if (!dbUser) {
-          // Create user in our database
+          // Create user in our database with phone from pending payment
           dbUser = await tx.user.create({
             data: {
               id: authData.user!.id,
               email: email.toLowerCase(),
               name: `${firstName} ${lastName}`.trim(),
+              phone: pendingPayment.customerPhone || null,
               role: "STUDENT",
             },
           });
           console.log("✅ User created in database:", dbUser.id);
+          console.log("✅ Phone number copied from pending payment:", pendingPayment.customerPhone);
         } else {
           console.log("✅ User already exists in database:", dbUser.id);
-          // Update name if different
+          // Update name and phone if different
+          const updateData: any = {};
           if (dbUser.name !== `${firstName} ${lastName}`.trim()) {
+            updateData.name = `${firstName} ${lastName}`.trim();
+          }
+          if (!dbUser.phone && pendingPayment.customerPhone) {
+            updateData.phone = pendingPayment.customerPhone;
+          }
+          
+          if (Object.keys(updateData).length > 0) {
             dbUser = await tx.user.update({
               where: { id: authData.user!.id },
-              data: { name: `${firstName} ${lastName}`.trim() },
+              data: updateData,
             });
-            console.log("✅ User name updated in database");
+            console.log("✅ User info updated in database:", updateData);
           }
         }
 
