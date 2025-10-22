@@ -15,6 +15,7 @@ import {
   Edit,
   Trash2,
   Eye,
+  Loader2,
 } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 import Navigation from "@/components/Navigation";
@@ -68,6 +69,7 @@ export default function AdminPage() {
   });
   const [userSearchTerm, setUserSearchTerm] = useState("");
   const [userSearchInput, setUserSearchInput] = useState("");
+  const [usersLoading, setUsersLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "courses" | "users">(
     "overview"
   );
@@ -111,6 +113,7 @@ export default function AdminPage() {
 
   const loadUsers = async (page: number = 1, search: string = "") => {
     try {
+      setUsersLoading(true);
       const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: "10",
@@ -132,6 +135,8 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error loading users:", error);
       toast.error("Failed to load users");
+    } finally {
+      setUsersLoading(false);
     }
   };
 
@@ -491,14 +496,23 @@ export default function AdminPage() {
                     placeholder="Search by name or email..."
                     value={userSearchInput}
                     onChange={(e) => setUserSearchInput(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleUserSearch()}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    onKeyPress={(e) => e.key === "Enter" && !usersLoading && handleUserSearch()}
+                    disabled={usersLoading}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <button
                     onClick={handleUserSearch}
-                    className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+                    disabled={usersLoading}
+                    className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
-                    Search
+                    {usersLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Searching...
+                      </>
+                    ) : (
+                      "Search"
+                    )}
                   </button>
                 </div>
               </div>
@@ -532,7 +546,34 @@ export default function AdminPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {users.length > 0 ? (
+                      {usersLoading ? (
+                        // Loading skeleton
+                        Array.from({ length: 5 }).map((_, index) => (
+                          <tr key={`skeleton-${index}`}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-40"></div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-28"></div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="h-6 bg-gray-200 rounded-full animate-pulse w-16"></div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-8"></div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : users.length > 0 ? (
                         users.map((user) => (
                           <tr key={user.id}>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -592,14 +633,14 @@ export default function AdminPage() {
                     <div className="flex-1 flex justify-between sm:hidden">
                       <button
                         onClick={() => handleUserPageChange(userPagination.currentPage - 1)}
-                        disabled={userPagination.currentPage === 1}
+                        disabled={userPagination.currentPage === 1 || usersLoading}
                         className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Previous
                       </button>
                       <button
                         onClick={() => handleUserPageChange(userPagination.currentPage + 1)}
-                        disabled={userPagination.currentPage === userPagination.totalPages}
+                        disabled={userPagination.currentPage === userPagination.totalPages || usersLoading}
                         className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Next
@@ -628,7 +669,7 @@ export default function AdminPage() {
                         <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                           <button
                             onClick={() => handleUserPageChange(userPagination.currentPage - 1)}
-                            disabled={userPagination.currentPage === 1}
+                            disabled={userPagination.currentPage === 1 || usersLoading}
                             className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <span className="sr-only">Previous</span>
@@ -654,7 +695,8 @@ export default function AdminPage() {
                                 )}
                                 <button
                                   onClick={() => handleUserPageChange(page)}
-                                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                                  disabled={usersLoading}
+                                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
                                     page === userPagination.currentPage
                                       ? "z-10 bg-primary-50 border-primary-500 text-primary-600"
                                       : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
@@ -666,7 +708,7 @@ export default function AdminPage() {
                             ))}
                           <button
                             onClick={() => handleUserPageChange(userPagination.currentPage + 1)}
-                            disabled={userPagination.currentPage === userPagination.totalPages}
+                            disabled={userPagination.currentPage === userPagination.totalPages || usersLoading}
                             className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <span className="sr-only">Next</span>
