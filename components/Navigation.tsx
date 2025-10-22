@@ -12,6 +12,7 @@ interface NavigationProps {
 
 export default function Navigation({ showUserMenu = true }: NavigationProps) {
   const [user, setUser] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -23,6 +24,17 @@ export default function Navigation({ showUserMenu = true }: NavigationProps) {
           data: { user },
         } = await supabase.auth.getUser();
         setUser(user);
+
+        // Fetch user role from database
+        if (user) {
+          const { data: userData } = await supabase
+            .from("users")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+          
+          setUserRole(userData?.role || "STUDENT");
+        }
       } catch (error) {
         console.error("Error getting user:", error);
       } finally {
@@ -37,6 +49,19 @@ export default function Navigation({ showUserMenu = true }: NavigationProps) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
+      
+      // Fetch role for new user
+      if (session?.user) {
+        const { data: userData } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+        
+        setUserRole(userData?.role || "STUDENT");
+      } else {
+        setUserRole(null);
+      }
     });
 
     return () => {
@@ -118,12 +143,63 @@ export default function Navigation({ showUserMenu = true }: NavigationProps) {
               // Logged in user menu
               showUserMenu && (
                 <>
-                  <Link
-                    href="/dashboard"
-                    className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Dashboard
-                  </Link>
+                  {/* Teacher Navigation Links */}
+                  {userRole === "TEACHER" && (
+                    <>
+                      <Link
+                        href="/teacher/dashboard"
+                        className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        Teacher Dashboard
+                      </Link>
+                      <Link
+                        href="/teacher/courses"
+                        className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        My Courses
+                      </Link>
+                      <Link
+                        href="/teacher/students"
+                        className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        My Students
+                      </Link>
+                    </>
+                  )}
+
+                  {/* Admin Navigation Links */}
+                  {userRole === "ADMIN" && (
+                    <>
+                      <Link
+                        href="/admin"
+                        className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        Admin Panel
+                      </Link>
+                      <Link
+                        href="/admin/courses"
+                        className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        Manage Courses
+                      </Link>
+                      <Link
+                        href="/admin/teachers"
+                        className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        Manage Teachers
+                      </Link>
+                    </>
+                  )}
+
+                  {/* Student Navigation Link */}
+                  {userRole === "STUDENT" && (
+                    <Link
+                      href="/dashboard"
+                      className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                      Dashboard
+                    </Link>
+                  )}
 
                   {/* User Profile Dropdown */}
                   <div className="relative" ref={dropdownRef}>
@@ -189,14 +265,66 @@ export default function Navigation({ showUserMenu = true }: NavigationProps) {
 
                         {/* Menu Items */}
                         <div className="py-1">
-                          <Link
-                            href="/dashboard"
-                            onClick={() => setDropdownOpen(false)}
-                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                          >
-                            <BookOpen className="h-4 w-4 mr-3" />
-                            Dashboard
-                          </Link>
+                          {userRole === "ADMIN" && (
+                            <>
+                              <Link
+                                href="/admin"
+                                onClick={() => setDropdownOpen(false)}
+                                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                              >
+                                <Settings className="h-4 w-4 mr-3" />
+                                Admin Panel
+                              </Link>
+                              <Link
+                                href="/admin/teachers"
+                                onClick={() => setDropdownOpen(false)}
+                                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                              >
+                                <User className="h-4 w-4 mr-3" />
+                                Manage Teachers
+                              </Link>
+                            </>
+                          )}
+
+                          {userRole === "TEACHER" && (
+                            <>
+                              <Link
+                                href="/teacher/dashboard"
+                                onClick={() => setDropdownOpen(false)}
+                                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                              >
+                                <BookOpen className="h-4 w-4 mr-3" />
+                                Teacher Dashboard
+                              </Link>
+                              <Link
+                                href="/teacher/courses"
+                                onClick={() => setDropdownOpen(false)}
+                                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                              >
+                                <BookOpen className="h-4 w-4 mr-3" />
+                                My Courses
+                              </Link>
+                              <Link
+                                href="/teacher/students"
+                                onClick={() => setDropdownOpen(false)}
+                                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                              >
+                                <User className="h-4 w-4 mr-3" />
+                                My Students
+                              </Link>
+                            </>
+                          )}
+
+                          {userRole === "STUDENT" && (
+                            <Link
+                              href="/dashboard"
+                              onClick={() => setDropdownOpen(false)}
+                              className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                            >
+                              <BookOpen className="h-4 w-4 mr-3" />
+                              Dashboard
+                            </Link>
+                          )}
 
                           <Link
                             href="/profile"

@@ -15,6 +15,7 @@ model User {
   id               String   @id @db.Uuid
   email            String   @unique
   name             String?
+  phone            String?
   image            String?
   role             Role     @default(STUDENT)
   stripeCustomerId String?  @unique
@@ -22,9 +23,10 @@ model User {
   updated_at       DateTime @updatedAt
 
   // Relations
-  enrollments Enrollment[]
-  progress    Progress[]
-  payments    Payment[]
+  enrollments    Enrollment[]
+  progress       Progress[]
+  payments       Payment[]
+  teacherCourses Course[]     @relation("TeacherCourses")
 
   @@map("users")
 }
@@ -37,10 +39,12 @@ model Course {
   image       String?
   featured    Boolean  @default(false)
   published   Boolean  @default(false)
+  teacherId   String?  @db.Uuid
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
+  teacher        User?            @relation("TeacherCourses", fields: [teacherId], references: [id], onDelete: SetNull)
   modules        Module[]
   enrollments    Enrollment[]
   payments       Payment[]
@@ -141,6 +145,7 @@ model PendingPayment {
 
 enum Role {
   ADMIN
+  TEACHER
   STUDENT
 }
 

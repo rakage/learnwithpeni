@@ -25,6 +25,7 @@ export async function GET(
           orderBy: { order: "asc" },
         },
       },
+      // Make sure to select teacherId for ownership check
     });
 
     if (!course) {
@@ -32,9 +33,10 @@ export async function GET(
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
-    // Check if course is published (unless user is admin)
-    if (!course.published && user.role !== "ADMIN") {
-      console.log("❌ Course not published and user is not admin");
+    // Check if course is published (unless user is admin or the teacher who owns it)
+    const isTeacherOwner = user.role === "TEACHER" && course.teacherId === user.id;
+    if (!course.published && user.role !== "ADMIN" && !isTeacherOwner) {
+      console.log("❌ Course not published and user is not admin or owner");
       return NextResponse.json(
         { error: "Course not available" },
         { status: 403 }
@@ -56,7 +58,7 @@ export async function GET(
     // Determine access
     const isAdmin = user.role === "ADMIN";
     const isEnrolled = !!enrollment;
-    const hasAccess = isAdmin || isEnrolled;
+    const hasAccess = isAdmin || isTeacherOwner || isEnrolled;
 
     if (!hasAccess) {
       // Return course info for purchase page but deny access

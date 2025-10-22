@@ -512,14 +512,13 @@ export default function PembayaranPage() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Start Your Remote Work Career Journey! ❤️
+              {course.title || "Start Your Remote Work Career Journey!"} ❤️
             </h1>
             <p
               className="text-xl text-gray-700 mb-6 max-w-2xl mx-auto"
               style={{ fontFamily: "Inter, sans-serif" }}
             >
-              Master remote work skills with internationally recognized
-              certification + job-ready templates
+              {course.description || "Master remote work skills with internationally recognized certification + job-ready templates"}
             </p>
             <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
               <div className="flex items-center gap-2">
@@ -549,7 +548,7 @@ export default function PembayaranPage() {
                       Rp 1.999.000
                     </span>
                     <span className="text-5xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-                      Rp 399.000
+                      Rp {course.price.toLocaleString("id-ID")}
                     </span>
                   </div>
                   <p className="text-gray-600">
@@ -565,55 +564,49 @@ export default function PembayaranPage() {
                   What You'll Get:
                 </h3>
 
-                {/* Course Content */}
-                <div className="mb-8">
-                  <h4 className="text-lg font-semibold text-purple-700 mb-4 flex items-center gap-2">
-                    <GraduationCap className="w-5 h-5" />
-                    Course Content
-                  </h4>
-                  <div className="space-y-3">
-                    {[
-                      "Sertifikasi Digital Marketing Bertaraf Internasional",
-                      "Interview 101 for a Remote Job",
-                      "Get Your First Remote Internship in Digital Marketing",
-                      "Applying for Remote Jobs",
-                      "Personal Branding on LinkedIn",
-                      "Mindset for Success in Remote Career",
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <div className="w-5 h-5 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <CheckCircle className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="text-gray-700">{item}</span>
-                      </div>
-                    ))}
+                {/* Course Content - Video Modules */}
+                {course.modules && course.modules.filter((m: any) => m.type === 'VIDEO').length > 0 && (
+                  <div className="mb-8">
+                    <h4 className="text-lg font-semibold text-purple-700 mb-4 flex items-center gap-2">
+                      <GraduationCap className="w-5 h-5" />
+                      Course Content
+                    </h4>
+                    <div className="space-y-3">
+                      {course.modules
+                        .filter((m: any) => m.type === 'VIDEO')
+                        .map((module: any, index: number) => (
+                          <div key={module.id} className="flex items-start gap-3">
+                            <div className="w-5 h-5 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <CheckCircle className="w-3 h-3 text-white" />
+                            </div>
+                            <span className="text-gray-700">{module.title}</span>
+                          </div>
+                        ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Templates & Resources */}
-                <div>
-                  <h4 className="text-lg font-semibold text-purple-700 mb-4 flex items-center gap-2">
-                    <Download className="w-5 h-5" />
-                    Templates & Resources
-                  </h4>
-                  <div className="space-y-3">
-                    {[
-                      "CV Template (Bahasa Indonesia & English)",
-                      "Portfolio Template (Versi PDF & Situs Web)",
-                      "Template Email Follow-Up ke Recruiter",
-                      "Template Message to Send After Interview",
-                      "Template FAQ in Interview",
-                      "Template LinkedIn Banner",
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <div className="w-5 h-5 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <CheckCircle className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="text-gray-700">{item}</span>
-                      </div>
-                    ))}
+                {/* Templates & Resources - Text and File Modules */}
+                {course.modules && course.modules.filter((m: any) => m.type === 'TEXT' || m.type === 'FILE').length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-purple-700 mb-4 flex items-center gap-2">
+                      <Download className="w-5 h-5" />
+                      Templates & Resources
+                    </h4>
+                    <div className="space-y-3">
+                      {course.modules
+                        .filter((m: any) => m.type === 'TEXT' || m.type === 'FILE')
+                        .map((module: any, index: number) => (
+                          <div key={module.id} className="flex items-start gap-3">
+                            <div className="w-5 h-5 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <CheckCircle className="w-3 h-3 text-white" />
+                            </div>
+                            <span className="text-gray-700">{module.title}</span>
+                          </div>
+                        ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 

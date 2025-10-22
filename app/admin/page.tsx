@@ -40,8 +40,18 @@ interface User {
   id: string;
   email: string;
   name: string;
+  phone: string;
+  registered: string;
+  paymentReference: string;
   createdAt: string;
   enrollments: number;
+}
+
+interface UserPagination {
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  limit: number;
 }
 
 export default function AdminPage() {
@@ -50,6 +60,14 @@ export default function AdminPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [userPagination, setUserPagination] = useState<UserPagination>({
+    currentPage: 1,
+    totalPages: 1,
+    totalCount: 0,
+    limit: 10,
+  });
+  const [userSearchTerm, setUserSearchTerm] = useState("");
+  const [userSearchInput, setUserSearchInput] = useState("");
   const [activeTab, setActiveTab] = useState<"overview" | "courses" | "users">(
     "overview"
   );
@@ -91,57 +109,59 @@ export default function AdminPage() {
     initializeAdmin();
   }, [router]);
 
+  const loadUsers = async (page: number = 1, search: string = "") => {
+    try {
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: "10",
+      });
+
+      if (search) {
+        queryParams.append("search", search);
+      }
+
+      const response = await apiGet(`/api/admin/users?${queryParams.toString()}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to load users");
+      }
+
+      const data = await response.json();
+      setUsers(data.users);
+      setUserPagination(data.pagination);
+    } catch (error) {
+      console.error("Error loading users:", error);
+      toast.error("Failed to load users");
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "users") {
+      loadUsers(userPagination.currentPage, userSearchTerm);
+    }
+  }, [activeTab, userPagination.currentPage, userSearchTerm]);
+
+  const handleUserSearch = () => {
+    setUserSearchTerm(userSearchInput);
+    setUserPagination({ ...userPagination, currentPage: 1 });
+  };
+
+  const handleUserPageChange = (newPage: number) => {
+    setUserPagination({ ...userPagination, currentPage: newPage });
+  };
+
   const loadAdminData = async () => {
     try {
-      // Mock data - replace with actual API calls using apiGet
-      const mockStats: AdminStats = {
-        totalUsers: 1234,
-        totalCourses: 5,
-        totalRevenue: 45678,
-        totalEnrollments: 892,
-      };
+      const response = await apiGet("/api/admin/dashboard");
 
-      const mockCourses: Course[] = [
-        {
-          id: "1",
-          title: "Remote Work Mastery",
-          description: "Complete guide to mastering remote work skills",
-          price: 97,
-          published: true,
-          enrollments: 856,
-          revenue: 83032,
-        },
-        {
-          id: "2",
-          title: "Digital Marketing Fundamentals",
-          description: "Learn the basics of digital marketing",
-          price: 127,
-          published: false,
-          enrollments: 0,
-          revenue: 0,
-        },
-      ];
+      if (!response.ok) {
+        throw new Error("Failed to load dashboard data");
+      }
 
-      const mockUsers: User[] = [
-        {
-          id: "1",
-          email: "john@example.com",
-          name: "John Doe",
-          createdAt: "2024-01-15",
-          enrollments: 1,
-        },
-        {
-          id: "2",
-          email: "jane@example.com",
-          name: "Jane Smith",
-          createdAt: "2024-01-14",
-          enrollments: 1,
-        },
-      ];
-
-      setStats(mockStats);
-      setCourses(mockCourses);
-      setUsers(mockUsers);
+      const data = await response.json();
+      setStats(data.stats);
+      setCourses(data.courses);
+      // Don't load users here, load them separately with pagination
     } catch (error) {
       console.error("Error loading admin data:", error);
       toast.error("Failed to load admin data");
@@ -221,6 +241,13 @@ export default function AdminPage() {
                   <BookOpen className="h-4 w-4" />
                   <span>Manage Courses</span>
                 </Link>
+                <Link
+                  href="/admin/teachers"
+                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
+                >
+                  <Users className="h-4 w-4" />
+                  <span>Manage Teachers</span>
+                </Link>
                 <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
                   <Users className="h-4 w-4" />
                   <span>View Users</span>
@@ -295,7 +322,7 @@ export default function AdminPage() {
                         Total Revenue
                       </p>
                       <p className="text-2xl font-bold text-gray-900">
-                        ${stats.totalRevenue.toLocaleString()}
+                        Rp {stats.totalRevenue.toLocaleString("id-ID")}
                       </p>
                     </div>
                   </div>
@@ -325,28 +352,25 @@ export default function AdminPage() {
                 </div>
                 <div className="p-6">
                   <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <Users className="h-4 w-4 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-900">
-                          New user registered: jane@example.com
-                        </p>
-                        <p className="text-xs text-gray-500">2 hours ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <DollarSign className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-900">
-                          Payment received: $97 for Remote Work Mastery
-                        </p>
-                        <p className="text-xs text-gray-500">4 hours ago</p>
-                      </div>
-                    </div>
+                    {users.length > 0 ? (
+                      users.slice(0, 3).map((user, index) => (
+                        <div key={user.id} className="flex items-center space-x-3">
+                          <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <Users className="h-4 w-4 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-900">
+                              New user: {user.email}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(user.createdAt).toLocaleDateString("id-ID")}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">No recent activity</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -407,7 +431,7 @@ export default function AdminPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ${course.price}
+                          Rp {course.price.toLocaleString("id-ID")}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
@@ -424,7 +448,7 @@ export default function AdminPage() {
                           {course.enrollments}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ${course.revenue.toLocaleString()}
+                          Rp {course.revenue.toLocaleString("id-ID")}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                           <button
@@ -457,49 +481,204 @@ export default function AdminPage() {
           {/* Users Tab */}
           {activeTab === "users" && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                User Management
-              </h2>
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  User Management
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={userSearchInput}
+                    onChange={(e) => setUserSearchInput(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && handleUserSearch()}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                  <button
+                    onClick={handleUserSearch}
+                    className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    Search
+                  </button>
+                </div>
+              </div>
 
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        User
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Email
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Joined
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Enrollments
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {users.map((user) => (
-                      <tr key={user.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {user.name}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.email}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(user.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.enrollments}
-                        </td>
+              <div className="bg-white rounded-lg shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          User
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Email
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Phone
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Registered
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Payment Ref
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Joined
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Enrollments
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {users.length > 0 ? (
+                        users.map((user) => (
+                          <tr key={user.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                {user.name || "-"}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {user.email}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {user.phone}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span
+                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                  user.registered === "Yes"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {user.registered}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
+                              {user.paymentReference !== "-" ? (
+                                <span className="text-xs">{user.paymentReference}</span>
+                              ) : (
+                                "-"
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {new Date(user.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {user.enrollments}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={7}
+                            className="px-6 py-4 text-center text-sm text-gray-500"
+                          >
+                            No users found
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {userPagination.totalPages > 1 && (
+                  <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                    <div className="flex-1 flex justify-between sm:hidden">
+                      <button
+                        onClick={() => handleUserPageChange(userPagination.currentPage - 1)}
+                        disabled={userPagination.currentPage === 1}
+                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        onClick={() => handleUserPageChange(userPagination.currentPage + 1)}
+                        disabled={userPagination.currentPage === userPagination.totalPages}
+                        className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </div>
+                    <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm text-gray-700">
+                          Showing{" "}
+                          <span className="font-medium">
+                            {(userPagination.currentPage - 1) * userPagination.limit + 1}
+                          </span>{" "}
+                          to{" "}
+                          <span className="font-medium">
+                            {Math.min(
+                              userPagination.currentPage * userPagination.limit,
+                              userPagination.totalCount
+                            )}
+                          </span>{" "}
+                          of{" "}
+                          <span className="font-medium">{userPagination.totalCount}</span>{" "}
+                          results
+                        </p>
+                      </div>
+                      <div>
+                        <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                          <button
+                            onClick={() => handleUserPageChange(userPagination.currentPage - 1)}
+                            disabled={userPagination.currentPage === 1}
+                            className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <span className="sr-only">Previous</span>
+                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                          {Array.from({ length: userPagination.totalPages }, (_, i) => i + 1)
+                            .filter((page) => {
+                              return (
+                                page === 1 ||
+                                page === userPagination.totalPages ||
+                                (page >= userPagination.currentPage - 1 &&
+                                  page <= userPagination.currentPage + 1)
+                              );
+                            })
+                            .map((page, index, array) => (
+                              <div key={page}>
+                                {index > 0 && array[index - 1] !== page - 1 && (
+                                  <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                    ...
+                                  </span>
+                                )}
+                                <button
+                                  onClick={() => handleUserPageChange(page)}
+                                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                                    page === userPagination.currentPage
+                                      ? "z-10 bg-primary-50 border-primary-500 text-primary-600"
+                                      : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                                  }`}
+                                >
+                                  {page}
+                                </button>
+                              </div>
+                            ))}
+                          <button
+                            onClick={() => handleUserPageChange(userPagination.currentPage + 1)}
+                            disabled={userPagination.currentPage === userPagination.totalPages}
+                            className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <span className="sr-only">Next</span>
+                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </nav>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

@@ -217,3 +217,60 @@ export async function checkUserAuth() {
     };
   }
 }
+
+// New simplified auth helper that returns a standard format
+export async function requireAuth(req: any) {
+  try {
+    // Get Authorization header
+    const authorization = req.headers.get("authorization");
+
+    let user = null;
+
+    if (authorization?.startsWith("Bearer ")) {
+      const token = authorization.substring(7);
+      const { data: userData, error: userError } =
+        await supabaseAdmin.auth.getUser(token);
+
+      if (userData?.user && !userError) {
+        user = userData.user;
+      }
+    }
+
+    if (!user) {
+      return {
+        authorized: false,
+        user: null,
+      };
+    }
+
+    // Get user from database with role
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        created_at: true,
+      },
+    });
+
+    if (!dbUser) {
+      return {
+        authorized: false,
+        user: null,
+      };
+    }
+
+    return {
+      authorized: true,
+      user: dbUser,
+    };
+  } catch (error) {
+    console.error("requireAuth error:", error);
+    return {
+      authorized: false,
+      user: null,
+    };
+  }
+}

@@ -210,10 +210,10 @@ export default function CoursePage() {
 
       const data = await response.json();
 
-      // Check access permissions
+      // Check access permissions (backend already checks ownership)
       const isAdmin = user.role === "ADMIN";
       const isEnrolled = data.enrollment !== null;
-      const hasAccess = isAdmin || isEnrolled;
+      const hasAccess = data.hasAccess; // Backend checks: admin OR teacher-owner OR enrolled
 
       if (!hasAccess) {
         setAccessDenied(true);
@@ -395,7 +395,7 @@ export default function CoursePage() {
                 </h3>
                 <p className="text-gray-600 mb-4">{course.description}</p>
                 <div className="text-2xl font-bold text-primary-600 mb-4">
-                  ${course.price}
+                  Rp {course.price.toLocaleString("id-ID")}
                 </div>
                 <button
                   onClick={handleEnrollNow}

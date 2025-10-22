@@ -32,6 +32,17 @@ export async function GET(
         published: true,
         createdAt: true,
         updatedAt: true,
+        modules: {
+          select: {
+            id: true,
+            title: true,
+            type: true,
+            order: true,
+          },
+          orderBy: {
+            order: 'asc',
+          },
+        },
         _count: {
           select: {
             modules: true,
@@ -59,6 +70,7 @@ export async function GET(
         price: course.price,
         image: course.image,
         published: course.published,
+        modules: course.modules,
         moduleCount: course._count.modules,
         enrollmentCount: course._count.enrollments,
         createdAt: course.createdAt,

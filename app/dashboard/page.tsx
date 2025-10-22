@@ -458,7 +458,7 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between text-sm mt-1">
                           <span className="text-gray-700">Price</span>
                           <span className="font-semibold text-green-600">
-                            ${course.price}
+                            Rp {course.price.toLocaleString("id-ID")}
                           </span>
                         </div>
                       </div>

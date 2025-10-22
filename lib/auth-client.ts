@@ -233,6 +233,22 @@ export async function apiPost(url: string, data: any) {
   });
 }
 
+// Convenience function for authenticated PUT requests (Bearer token)
+export async function apiPut(url: string, data: any) {
+  return AuthClient.authenticatedFetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+}
+
+// Convenience function for authenticated DELETE requests (Bearer token)
+export async function apiDelete(url: string) {
+  return AuthClient.authenticatedFetch(url, { method: "DELETE" });
+}
+
 // Session-based convenience functions
 export async function sessionGet(url: string) {
   return AuthClient.sessionFetch(url, { method: "GET" });
