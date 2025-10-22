@@ -38,6 +38,11 @@ interface Course {
   title: string;
   description: string;
   price: number;
+  modules?: Array<{
+    id: string;
+    title: string;
+    type: string;
+  }>;
 }
 
 interface CustomerInfo {
