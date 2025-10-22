@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
           OR: [
             { customerEmail: { contains: search, mode: "insensitive" as const } },
             { customerName: { contains: search, mode: "insensitive" as const } },
+            { stripePaymentId: { contains: search, mode: "insensitive" as const } },
           ],
         }
       : {};
@@ -73,6 +74,49 @@ export async function GET(req: NextRequest) {
       },
     });
 
+    // Also search for users by payment reference
+    let usersWithPaymentRef: typeof registeredUsers = [];
+    if (search) {
+      usersWithPaymentRef = await prisma.user.findMany({
+        where: {
+          payments: {
+            some: {
+              stripePaymentId: { contains: search, mode: "insensitive" as const },
+              status: "COMPLETED",
+            },
+          },
+        },
+        include: {
+          _count: {
+            select: {
+              enrollments: true,
+            },
+          },
+          payments: {
+            where: {
+              status: "COMPLETED",
+            },
+            select: {
+              stripePaymentId: true,
+              createdAt: true,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+          },
+        },
+      });
+    }
+
+    // Merge and deduplicate users
+    const allRegisteredUsers = [...registeredUsers];
+    for (const user of usersWithPaymentRef) {
+      if (!allRegisteredUsers.find((u) => u.id === user.id)) {
+        allRegisteredUsers.push(user);
+      }
+    }
+
     // Get all pending payments with COMPLETED status (unregistered users)
     const pendingPayments = await prisma.pendingPayment.findMany({
       where: {
@@ -88,7 +132,7 @@ export async function GET(req: NextRequest) {
     const userMap = new Map<string, any>();
 
     // Add registered users to the map
-    for (const user of registeredUsers) {
+    for (const user of allRegisteredUsers) {
       // Check if user has a COMPLETED pending payment
       const pendingPayment = pendingPayments.find(
         (pp) => pp.customerEmail.toLowerCase() === user.email.toLowerCase()

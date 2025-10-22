@@ -493,7 +493,7 @@ export default function AdminPage() {
                 <div className="flex items-center space-x-2">
                   <input
                     type="text"
-                    placeholder="Search by name or email..."
+                    placeholder="Search by name, email, or payment ref..."
                     value={userSearchInput}
                     onChange={(e) => setUserSearchInput(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && !usersLoading && handleUserSearch()}
