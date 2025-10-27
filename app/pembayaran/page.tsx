@@ -89,6 +89,7 @@ export default function PembayaranPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
 
   // Calculate fees
   const calculateFees = (basePrice: number) => {
@@ -279,10 +280,17 @@ export default function PembayaranPage() {
     return true;
   };
 
-  const handlePayment = async () => {
+  const handlePayment = () => {
     if (!validateForm()) {
       return;
     }
+
+    // Show email confirmation modal before proceeding
+    setShowEmailConfirmation(true);
+  };
+
+  const proceedWithPayment = async () => {
+    setShowEmailConfirmation(false);
 
     try {
       setIsProcessing(true);
@@ -1042,6 +1050,88 @@ export default function PembayaranPage() {
           </div>
         </div>
       </div>
+
+      {/* Email Confirmation Modal */}
+      {showEmailConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-8 h-8 text-white" />
+              </div>
+              <h3
+                className="text-2xl font-bold mb-4"
+                style={{
+                  fontFamily: "Poppins, sans-serif",
+                  background: "linear-gradient(135deg, #FF69B4, #9966CC)",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Pastikan alamat email kamu benar!
+              </h3>
+            </div>
+            
+            <div className="space-y-4 mb-6 text-left">
+              <p
+                className="text-gray-700 leading-relaxed"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                Setelah pembayaran berhasil, akses kelas akan dikirimkan ke email yang kamu masukkan.
+              </p>
+              <p
+                className="text-gray-700 leading-relaxed"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                Jika kamu salah mengetik email, kami tidak bisa mengirim akses kelasmu.
+              </p>
+              <p
+                className="text-gray-700 leading-relaxed font-semibold"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                Mohon periksa kembali sebelum melanjutkan ke pembayaran.
+              </p>
+              
+              <div className="bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-200 rounded-xl p-4 mt-6">
+                <p className="text-sm text-gray-600 mb-2">Email kamu:</p>
+                <p
+                  className="text-lg font-bold break-all"
+                  style={{
+                    fontFamily: "Poppins, sans-serif",
+                    background: "linear-gradient(135deg, #FF69B4, #9966CC)",
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  {customerInfo.email}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowEmailConfirmation(false)}
+                className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all duration-300"
+                style={{ fontFamily: "Poppins, sans-serif" }}
+              >
+                Cek Lagi
+              </button>
+              <button
+                onClick={proceedWithPayment}
+                className="flex-1 px-6 py-3 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl"
+                style={{
+                  background: "linear-gradient(135deg, #FF69B4, #9966CC)",
+                  fontFamily: "Poppins, sans-serif",
+                }}
+              >
+                Lanjutkan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Redirect Loading Overlay */}
       {isRedirecting && (
